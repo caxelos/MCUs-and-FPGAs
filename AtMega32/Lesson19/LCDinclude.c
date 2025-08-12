@@ -1,0 +1,239 @@
+//Include routines for LCD (Chapter 17)
+//========================
+
+
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/pgmspace.h>
+#include <stdlib.h>
+
+#include "LCDinclude.h"
+
+//LCD pinout: 1:GND, 2:+5V, 3:Contrast, 4:RS,
+//5:R/!W, 6:E, 7:D0, ..., 14:D7, 15:BL+, 16:BL- 
+//Check your LCD for power supply and back light pins
+
+#define lcd_DDR DDRA
+#define lcd_PORT PORTA	//4 high bits
+#define lcd_PIN PINA
+#define lcdBUSYline 7
+
+#define lcdRS_DDR DDRC
+#define lcdRS_PORT PORTC
+#define lcdRSline 1
+
+#define lcdRW_DDR DDRC
+#define lcdRW_PORT PORTC
+#define lcdRWline 6
+
+#define lcdEN_DDR DDRC
+#define lcdEN_PORT PORTC
+#define lcdENline 7
+
+#define LCDclear 0b00000001
+#define LCDhome 0b00000010
+#define LCDon 0b00001100
+#define LCDoff 0b00001000
+#define LCDcursorOn 0b00001111
+#define LCDcursorOff 0b00001100
+
+char* itoa(int, char* , int);
+char* ultoa (unsigned long, char*, int);
+char* dtostrf (double, signed char, unsigned char, char*);
+
+const uint8_t PROGMEM LCDgreekFontTbl[]={ 
+0x1F, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00, //0& 8, "?"
+0x04, 0x0A, 0x0A, 0x11, 0x11, 0x11, 0x1F, 0x00, //1& 9, "?"
+0x04, 0x0A, 0x0A, 0x11, 0x11, 0x11, 0x11, 0x00, //2&10, "?"
+0x1F, 0x00, 0x00, 0x0E, 0x00, 0x00, 0x1F, 0x00, //3&11, "?"
+0x1F, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x00, //4&12, "?"
+0x04, 0x0E, 0x15, 0x15, 0x15, 0x0E, 0x04, 0x00, //5&13, "?"
+0x15, 0x15, 0x15, 0x15, 0x0E, 0x04, 0x04, 0x00, //6&14, "?"
+0x0E, 0x11, 0x11, 0x11, 0x0E, 0x00, 0x1F, 0x00  //7&15, "?"
+};
+
+const uint8_t translationTbl[]={'A','B',8,9,'E','Z','H',
+0xF2,'I','K',10,'M','N',11,'O',12,'P',0xF6,0xF6,'T','Y',
+13,'X',14,15};
+
+
+
+//======================================
+void LCDsendEnPulse() {
+	lcdEN_PORT |= (1<<lcdENline);
+	_delay_us(1);
+	lcdEN_PORT &= ~(1<<lcdENline);
+	_delay_us(1);
+}
+
+//===========================================
+void LCDtransmit4(uint8_t LCDcharacter) {
+	uint8_t LCDpinTemp = lcd_PIN & 0x0F; //????? ?? low nibble
+	//????????? ?? high nibble ??? ?????????:
+	uint8_t LCDsend = LCDcharacter & 0xF0;
+	LCDpinTemp |= LCDsend; //????? ?? ??? ????
+	lcd_PORT = LCDpinTemp; //??????? ???? ??? ????
+	LCDsendEnPulse(); //?????? ????? Enable ??? ?? high nibble
+
+	LCDpinTemp = lcd_PIN & 0x0F; //????? ?? low nibble ??? ?????
+	//????????? ?? low nibble ??? ?????????
+	LCDsend = LCDcharacter & 0x0F;
+	LCDpinTemp = (LCDsend<<4) | LCDpinTemp; //????? ?? ??? ????
+	lcd_PORT = LCDpinTemp; //??????? ???? ??? ????
+	LCDsendEnPulse(); //?????? ????? Enable ??? ?? low nibble
+}
+
+//======================================
+void LCDwait4() {
+	lcd_DDR &= 0b00001111;		 		//??????? ?? ??????? data
+	lcdRS_PORT &= ~(1<<lcdRSline); 	//????????? ??? ??????
+	lcdRW_PORT |= (1<<lcdRWline);	 	//????????? ??? ????????
+	uint8_t lcdBUSYflag = 1;
+	while (lcdBUSYflag != 0) {
+		lcdEN_PORT |= (1<<lcdENline);	//?????????? ?????? enable
+		_delay_us(1);
+		lcdBUSYflag = lcd_PIN & (1<<lcdBUSYline);
+		lcdEN_PORT &= ~(1<<lcdENline);//??????????? ?????? enable
+		_delay_us(1);
+		LCDsendEnPulse(); 		 		//????? ???? ?????? enable
+	}
+	lcd_DDR |= 0b11110000; 		 		// ?????? ?? ??????? data
+}
+
+//======================================
+void LCDsendCmd(uint8_t LCDdata) {
+	LCDwait4();
+	lcdRS_PORT &= ~(1<<lcdRSline); 	//????????? ??? ??????
+	lcdRW_PORT &= ~(1<<lcdRWline); 	//????????? ??? ???????
+	LCDtransmit4(LCDdata); 				//?????? ?? byte ???? LCD
+}
+
+//=======================================
+void LCDprintChar(uint8_t LCDdata) {
+	LCDwait4();
+	lcdRS_PORT |= (1<<lcdRSline); 	//????????? ??? data
+	lcdRW_PORT &= ~(1<<lcdRWline); 	//????????? ??? ???????
+	LCDtransmit4(LCDdata); 				//?????? ?? byte ???? LCD
+}
+
+//============================================
+void LCDdefineGrk() {
+	LCDsendCmd(64); //Select CGRAM
+	uint8_t grkCharByte;
+	for (uint8_t i=0; i<64; i++) {
+		grkCharByte = pgm_read_byte(LCDgreekFontTbl+i);
+		LCDprintChar(grkCharByte);
+	}
+}
+
+//======================================
+void LCD4init() {
+	lcdEN_DDR |= (1<<lcdENline);
+	lcdRW_DDR |= (1<<lcdRWline);
+	lcdRS_DDR |= (1<<lcdRSline);
+	lcd_DDR |= 0b11110000; 			// ?????? ?? ??????? data
+	lcdRS_PORT &= ~(1<<lcdRSline);//????????? ??? ??????
+	lcdRW_PORT &= ~(1<<lcdRWline);//????????? ??? ???????
+	_delay_ms(16); 					//(1)
+	//????? ?? low nibble ??? ?????:
+	uint8_t LCDpinTemp = lcd_PIN & 0x0F;
+	uint8_t LCDsend = 0b00110000;	//(2) ??????? ??? 8????? ???????.
+	LCDpinTemp = LCDsend | LCDpinTemp; //????? ?? ??? ????
+	lcd_PORT = LCDpinTemp; 			//??????? ???? ??? ????
+	lcdEN_PORT |= (1<<lcdENline);	//?????? ???? ????? Enable
+	_delay_us(120);
+	lcdEN_PORT &= ~(1<<lcdENline);
+	_delay_us(120);
+	_delay_us(1200); 					//(3)
+	lcdEN_PORT |= (1<<lcdENline); //(4) 2? ???? ????. ??? 8 bits
+	_delay_us(120);
+	lcdEN_PORT &= ~(1<<lcdENline);
+	_delay_us(120);
+	_delay_us(110); 					//(5)
+	lcdEN_PORT |= (1<<lcdENline); //(6) 3? ???? ????. ??? 8 bits
+	_delay_us(120);
+	lcdEN_PORT &= ~(1<<lcdENline);
+	_delay_us(120);
+
+	//init
+	LCDpinTemp = lcd_PIN & 0x0F; 			//????? ?? low nibble ??? ?????
+	LCDsend = 0b00100000; 					//(1) ??????? ??? 4????? ???????????
+	LCDpinTemp = LCDsend | LCDpinTemp; 	//????? ?? ??? ????
+	lcd_PORT = LCDpinTemp; 					//??????? ???? ??? ????
+	lcdEN_PORT |= (1<<lcdENline); 		//?????? ???? ????? Enable
+	_delay_us(120);
+	lcdEN_PORT &= ~(1<<lcdENline);
+	_delay_us(120);
+	LCDsendCmd(0b00101100); //(2) ????? 2 ???????
+	LCDsendCmd(0b00001100); //(3) ???????????? ??????
+	LCDsendCmd(0b00000110); //(4) ????? ???? ?? ?????
+	LCDdefineGrk();
+	LCDsendCmd(LCDclear);
+}
+
+//============================================
+void LCDcursor(uint8_t line, uint8_t column) {
+	if ( (line==0 || line==1) && column<16) {
+		uint8_t DDRAMaddress = 128 + column + 64 * line;
+		LCDsendCmd(DDRAMaddress);
+	}
+}
+
+//============================================
+void LCDprintInt(int number) {
+	char s[7]; //??????? & ??????? ???? -32.768 & ???
+	itoa(number, s, 10);
+	for (uint8_t i=0; i<6; i++) { //????? ??? ???, ?? ????? 7??
+		char currentdigit = s[i];
+		if (currentdigit == 0) break;
+		LCDprintChar(currentdigit);
+	}
+}
+//============================================
+void LCDprintByte(uint8_t number) {
+  uint8_t monades = number % 10;
+  number = number / 10; 
+  uint8_t dekades = number % 10;
+  number = number / 10; 
+  LCDprintChar((char)number+48);
+  LCDprintChar((char)dekades+48);
+  LCDprintChar((char)monades+48);
+}
+
+//============================================
+void LCDprintULong(unsigned long number) {
+	char s[11]; //??????? ???? 4294967295 + ???
+	ultoa(number, s, 10);
+	for (uint8_t i=0; i<10; i++) {
+		char currentdigit = s[i];
+		if (currentdigit == 0) break;
+		LCDprintChar(currentdigit);
+	}
+}
+
+//============================================
+void LCDprintFloat(float number,uint8_t width,uint8_t prec) {
+	char s[width+1];
+	dtostrf(number, width, prec, s);
+	for (uint8_t i=0; i<width; i++) {
+		char currentdigit = s[i];
+		if (currentdigit == 0) break;
+		LCDprintChar(currentdigit);
+	}
+}
+
+//============================================
+void LCDprintCT(char s[]) {
+	for (int i = 0; i < 16; i++) {
+		char currentChar = s[i];
+		if (currentChar == 0) break;
+		char LCDchar;
+		if (currentChar < 128) {
+			LCDchar = currentChar;
+		} else {
+			LCDchar = translationTbl[currentChar-0xC1];
+		}
+		LCDprintChar(LCDchar);
+	}
+}
+
