@@ -1,2 +1,2 @@
-Mini-projects on several Microcontrollers \& field programming logic devices (FPGAs)
+Mini-projects on Microcontrollers \& field programming logic devices (FPGAs)
 
