@@ -11,9 +11,13 @@
 
 #define RCC_BASE_ADDR              0x40023800UL
 
-#define RCC_CFGR_REG_OFFSET        0x08UL
+#define RCC_CFGR_REG_OFFSET        0x08UL // we need it to switch the system clock to HSE (RCC_CFGR)
+
+#define RCC_CR_REG_OFFSET          0x00UL // we need it to set HSEON bit
 
 #define RCC_CFGR_REG_ADDR          (RCC_BASE_ADDR + RCC_CFGR_REG_OFFSET )
+
+#define RCC_CR_REG_ADDR            (RCC_BASE_ADDR + RCC_CR_REG_OFFSET ) // we need it to set HSEON bit
 
 #define GPIOA_BASE_ADDR            0x40020000UL
 
@@ -21,38 +25,44 @@ typedef volatile uint32_t Reg;
 
 int main(void)
 {
-	Reg *pRccCfgrReg =  (Reg*) RCC_CFGR_REG_ADDR;
 
+	Reg *pRccCrReg = (Reg *)RCC_CR_REG_ADDR;
+	Reg *pRccCfgrReg = (Reg *)RCC_CFGR_REG_ADDR;
 
-	//1. Configure the RCC_CFGR MCO1 bit fields to select HSI as clock source
-	*pRccCfgrReg &= ~(0x3 << 21); //clear 21 and 22 bit positions
+	//1.Enable the HSE clock using HSEON bit (RCC_CR)
+	*pRccCrReg |= ( 1 << 16);
 
-	//Configure MCO1 prescaler
+	//2. Wait until HSE clock from the external crystal stabilizes (only if crystal is connected )
+	while( ! (*pRccCrReg & ( 1 << 17) ) );
+
+	//3. Switch the system clock to HSE (RCC_CFGR)
+	*pRccCfgrReg |= ( 1 << 0);
+
+	/**************Do MCO1 settings to measure it*********************/
+
+	//1. Configure the RCC_CFGR MCO1 bit fields to select HSE as clock source
+	*pRccCfgrReg |= ( 1 << 22); //clear 21 and SET 22
+
+	//Configure MCO1 prescaler // divisor as 4 (so, from the default 8MHz clock we go to 2MHz clock, 500ns)
+	// Warning! The Reference Manual has mistake here. Instead of 24:26, the bits should be set 26:24
 	*pRccCfgrReg |= ( 1 << 25);
 	*pRccCfgrReg |= ( 1 << 26);
 
+
 	//2. Configure PA8 to AF0 mode to behave as MCO1 signal
-/*
- * You are not expected to understand the below codes for the time being
- * because these codes are related to GPIO configurations,
- * which will be covered in later sections of this course.
- */
-
 	//a ) Enable the peripheral clock for GPIOA peripheral
-
 	Reg *pRCCAhb1Enr = (Reg *)(RCC_BASE_ADDR + 0x30);
 	*pRCCAhb1Enr |= ( 1 << 0); //Enable GPIOA peripheral clock
 
 	//b ) Configure the mode of GPIOA pin 8 as alternate function mode
-
 	Reg *pGPIOAModeReg = (Reg *)(GPIOA_BASE_ADDR + 00);
 	*pGPIOAModeReg &= ~( 0x3 << 16); //clear
 	*pGPIOAModeReg |= ( 0x2 << 16);  //set
 
 	//c ) Configure the alternation function register to set the mode 0 for PA8
-
 	Reg *pGPIOAAltFunHighReg = (Reg *)(GPIOA_BASE_ADDR + 0x24);
 	*pGPIOAAltFunHighReg &= ~( 0xf << 0);
+
 
 	for(;;);
 }

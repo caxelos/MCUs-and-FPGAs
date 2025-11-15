@@ -32,25 +32,16 @@ int main(void)
 	*pRccCfgrReg |= ( 1 << 26);
 
 	//2. Configure PA8 to AF0 mode to behave as MCO1 signal
-/*
- * You are not expected to understand the below codes for the time being
- * because these codes are related to GPIO configurations,
- * which will be covered in later sections of this course.
- */
-
 	//a ) Enable the peripheral clock for GPIOA peripheral
-
 	Reg *pRCCAhb1Enr = (Reg *)(RCC_BASE_ADDR + 0x30);
 	*pRCCAhb1Enr |= ( 1 << 0); //Enable GPIOA peripheral clock
 
 	//b ) Configure the mode of GPIOA pin 8 as alternate function mode
-
 	Reg *pGPIOAModeReg = (Reg *)(GPIOA_BASE_ADDR + 00);
 	*pGPIOAModeReg &= ~( 0x3 << 16); //clear
 	*pGPIOAModeReg |= ( 0x2 << 16);  //set
 
 	//c ) Configure the alternation function register to set the mode 0 for PA8
-
 	Reg *pGPIOAAltFunHighReg = (Reg *)(GPIOA_BASE_ADDR + 0x24);
 	*pGPIOAAltFunHighReg &= ~( 0xf << 0);
 

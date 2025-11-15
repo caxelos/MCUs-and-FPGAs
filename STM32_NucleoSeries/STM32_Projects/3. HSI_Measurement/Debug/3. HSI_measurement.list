@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  16 .debug_macro  00000f1a  00000000  00000000  00010570  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   00000412  00000000  00000000  0001148a  2**0
+ 17 .debug_line   00000410  00000000  00000000  0001148a  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    00003bcb  00000000  00000000  0001189c  2**0
+ 18 .debug_str    00003bcb  00000000  00000000  0001189a  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  00015467  2**0
+ 19 .comment      0000007b  00000000  00000000  00015465  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00000058  00000000  00000000  000154e4  2**2
+ 20 .debug_frame  00000058  00000000  00000000  000154e0  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -112,11 +112,9 @@ int main(void)
  800020e:	f043 6280 	orr.w	r2, r3, #67108864	; 0x4000000
  8000212:	68fb      	ldr	r3, [r7, #12]
  8000214:	601a      	str	r2, [r3, #0]
- * which will be covered in later sections of this course.
- */
 
+	//2. Configure PA8 to AF0 mode to behave as MCO1 signal
 	//a ) Enable the peripheral clock for GPIOA peripheral
-
 	Reg *pRCCAhb1Enr = (Reg *)(RCC_BASE_ADDR + 0x30);
  8000216:	4b10      	ldr	r3, [pc, #64]	; (8000258 <main+0x70>)
  8000218:	60bb      	str	r3, [r7, #8]
@@ -128,7 +126,6 @@ int main(void)
  8000224:	601a      	str	r2, [r3, #0]
 
 	//b ) Configure the mode of GPIOA pin 8 as alternate function mode
-
 	Reg *pGPIOAModeReg = (Reg *)(GPIOA_BASE_ADDR + 00);
  8000226:	4b0d      	ldr	r3, [pc, #52]	; (800025c <main+0x74>)
  8000228:	607b      	str	r3, [r7, #4]
@@ -146,7 +143,6 @@ int main(void)
  8000240:	601a      	str	r2, [r3, #0]
 
 	//c ) Configure the alternation function register to set the mode 0 for PA8
-
 	Reg *pGPIOAAltFunHighReg = (Reg *)(GPIOA_BASE_ADDR + 0x24);
  8000242:	4b07      	ldr	r3, [pc, #28]	; (8000260 <main+0x78>)
  8000244:	603b      	str	r3, [r7, #0]

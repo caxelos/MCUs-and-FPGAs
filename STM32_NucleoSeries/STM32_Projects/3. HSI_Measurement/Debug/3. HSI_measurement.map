@@ -602,9 +602,9 @@ OUTPUT(3. HSI_measurement.elf elf32-littlearm)
  .debug_macro   0x0000000000000cd1       0x6a Src/main.o
  .debug_macro   0x0000000000000d3b      0x1df Src/main.o
 
-.debug_line     0x0000000000000000      0x412
- .debug_line    0x0000000000000000      0x38e Src/main.o
- .debug_line    0x000000000000038e       0x84 Startup/startup_stm32f407vgtx.o
+.debug_line     0x0000000000000000      0x410
+ .debug_line    0x0000000000000000      0x38c Src/main.o
+ .debug_line    0x000000000000038c       0x84 Startup/startup_stm32f407vgtx.o
 
 .debug_str      0x0000000000000000     0x3bcb
  .debug_str     0x0000000000000000     0x3b9a Src/main.o
