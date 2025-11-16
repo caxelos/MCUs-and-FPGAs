@@ -152,7 +152,7 @@ int main(void)
  800024a:	f023 020f 	bic.w	r2, r3, #15
  800024e:	683b      	ldr	r3, [r7, #0]
  8000250:	601a      	str	r2, [r3, #0]
-		uint32_t *pGPIOAAltFunHighReg = (uint32_t *)(GPIOA_BASE_ADDR + 0x24);
+		Reg *pGPIOAAltFunHighReg = (Reg *)(GPIOA_BASE_ADDR + 0x24);
 		*pGPIOAAltFunHighReg &= ~( 0xf << 0); // AFSEL8, set 0000 (AF0)
 
 	#endif
