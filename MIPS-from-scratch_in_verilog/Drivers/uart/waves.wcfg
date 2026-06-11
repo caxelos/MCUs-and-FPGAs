@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/Xilinx/12.2/ISE_DS/ERG2MER3/myTestBench_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="myTestBench" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="21" />
+   <wvobject fp_name="/myTestBench/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/reset" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider17" type="divider">
+      <obj_property name="label">transmitter</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/Tx_BUSY" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Tx_BUSY</obj_property>
+      <obj_property name="ObjectShortName">Tx_BUSY</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/Tx_sample_ENABLE" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Tx_sample_ENABLE</obj_property>
+      <obj_property name="ObjectShortName">Tx_sample_ENABLE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/Tx_baud_select" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">Tx_baud_select[2:0]</obj_property>
+      <obj_property name="ObjectShortName">Tx_baud_select[2:0]</obj_property>
+      <obj_property name="label">Tx_baud_select[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/Tx_DATA" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">Tx_DATA[0:7]</obj_property>
+      <obj_property name="ObjectShortName">Tx_DATA[0:7]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/Tx_EN" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Tx_EN</obj_property>
+      <obj_property name="ObjectShortName">Tx_EN</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/Tx_WR" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Tx_WR</obj_property>
+      <obj_property name="ObjectShortName">Tx_WR</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/TxD" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">TxD</obj_property>
+      <obj_property name="ObjectShortName">TxD</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/Tx_BUSY_REG" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Tx_BUSY_REG</obj_property>
+      <obj_property name="ObjectShortName">Tx_BUSY_REG</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/parity" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">parity</obj_property>
+      <obj_property name="ObjectShortName">parity</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider18" type="divider">
+      <obj_property name="label">receiver</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/reset" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/startBitFound" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">startBitFound</obj_property>
+      <obj_property name="ObjectShortName">startBitFound</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/outToLEDs" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">outToLEDs[0:7]</obj_property>
+      <obj_property name="ObjectShortName">outToLEDs[0:7]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/Rx_FERROR" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Rx_FERROR</obj_property>
+      <obj_property name="ObjectShortName">Rx_FERROR</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/Rx_PERROR" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Rx_PERROR</obj_property>
+      <obj_property name="ObjectShortName">Rx_PERROR</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/Rx_VALID" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Rx_VALID</obj_property>
+      <obj_property name="ObjectShortName">Rx_VALID</obj_property>
+   </wvobject>
+   <wvobject fp_name="/myTestBench/uart_Tx/uart_receiver0/RSD/Rx_EN" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Rx_EN</obj_property>
+      <obj_property name="ObjectShortName">Rx_EN</obj_property>
+   </wvobject>
+</wave_config>
