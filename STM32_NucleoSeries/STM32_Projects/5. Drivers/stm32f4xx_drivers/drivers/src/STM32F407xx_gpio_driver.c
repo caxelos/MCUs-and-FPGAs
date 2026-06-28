@@ -125,7 +125,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
     	SYSCFG_PCLK_EN();
     	SYSCFG->EXTICR[temp1] = portcode << (temp2 * 4);
 
-		//3 . enable the exti interrupt delivery using IMR
+		//3 . enable the exti interrupt delivery using IMR - Must Command for interrupts!
 		EXTI->IMR |= 1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber;
 
     }

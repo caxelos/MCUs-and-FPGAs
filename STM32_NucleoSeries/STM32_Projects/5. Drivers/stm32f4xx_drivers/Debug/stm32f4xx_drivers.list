@@ -39,11 +39,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  17 .debug_line   00000c67  00000000  00000000  00013c88  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    000086ba  00000000  00000000  000148ef  2**0
+ 18 .debug_str    000086bc  00000000  00000000  000148ef  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  0001cfa9  2**0
+ 19 .comment      0000007b  00000000  00000000  0001cfab  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00000288  00000000  00000000  0001d024  2**2
+ 20 .debug_frame  00000288  00000000  00000000  0001d028  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -143,8 +143,8 @@ int main(void)
     GpioBtn.pGPIOx = GPIOA; // GPIOD for the discovery board
  800023c:	4b0d      	ldr	r3, [pc, #52]	; (8000274 <main+0x8c>)
  800023e:	603b      	str	r3, [r7, #0]
-    GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_0;// GPIO_PIN_NO_3; // GPIO_PIN_NO_12 for discovery board, for my board, it's PA5
- 8000240:	2300      	movs	r3, #0
+    GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_5;// GPIO_PIN_NO_3; // GPIO_PIN_NO_12 for discovery board, for my board, it's PA5
+ 8000240:	2305      	movs	r3, #5
  8000242:	713b      	strb	r3, [r7, #4]
     GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_RT;//GPIO_MODE_IT_FT; //change the mode from MODE_IN to MODE_IT_FT (Interrupt Falling Edge)
  8000244:	2305      	movs	r3, #5
@@ -153,10 +153,9 @@ int main(void)
  8000248:	2302      	movs	r3, #2
  800024a:	71bb      	strb	r3, [r7, #6]
     //GpioBtn.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // This doesn't matter for Inputs, only for outputs
-    GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;	// I changed this to Pull-UP Because, if we look the schematic of button, we already have an 220K external resistor.
- 800024c:	2301      	movs	r3, #1
+    GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; //GPIO_PIN_PU;	// I use an external 20K resistance, so I don't use the internal ones
+ 800024c:	2300      	movs	r3, #0
  800024e:	71fb      	strb	r3, [r7, #7]
-
     GPIO_PeriClockControl( GPIOA, ENABLE); //GPIOD for discovery board
  8000250:	2101      	movs	r1, #1
  8000252:	4808      	ldr	r0, [pc, #32]	; (8000274 <main+0x8c>)
@@ -167,13 +166,13 @@ int main(void)
  800025c:	f000 f8bc 	bl	80003d8 <GPIO_Init>
 
     //IRQ configurations for button interrupt
-    GPIO_IRQPriorityConfig( (uint8_t )IRQ_NO_EXTI0, NVIC_IRQ_PRIO15); // configure priority, set it to 15 (any value from 0 to 15). Better give macro
+    GPIO_IRQPriorityConfig( (uint8_t )IRQ_NO_EXTI9_5, NVIC_IRQ_PRIO15); // configure priority, set it to 15 (any value from 0 to 15). Better give macro
  8000260:	210f      	movs	r1, #15
- 8000262:	2006      	movs	r0, #6
+ 8000262:	2017      	movs	r0, #23
  8000264:	f000 fae8 	bl	8000838 <GPIO_IRQPriorityConfig>
-    GPIO_IRQInterruptConfig((uint8_t )IRQ_NO_EXTI0, ENABLE); // PD5 sends it's interrupt into EXTI5
+    GPIO_IRQInterruptConfig((uint8_t )IRQ_NO_EXTI9_5, ENABLE); // PD5 sends it's interrupt into EXTI5
  8000268:	2101      	movs	r1, #1
- 800026a:	2006      	movs	r0, #6
+ 800026a:	2017      	movs	r0, #23
  800026c:	f000 fa62 	bl	8000734 <GPIO_IRQInterruptConfig>
 
     while (1);
@@ -181,22 +180,22 @@ int main(void)
  8000272:	bf00      	nop
  8000274:	40020000 	.word	0x40020000
 
-08000278 <EXTI0_IRQHandler>:
+08000278 <EXTI9_5_IRQHandler>:
     return 0;
 }
 
 /* EXTI Line[9:5] interrupts */
-void EXTI0_IRQHandler(void)  // Mapping between Interrupt function name and pin number can be found at the MCU's datasheet document.
+void EXTI9_5_IRQHandler(void)  // Mapping between Interrupt function name and pin number can be found at the MCU's datasheet document.
 {
  8000278:	b580      	push	{r7, lr}
  800027a:	af00      	add	r7, sp, #0
 	//delay(); //200ms . wait till button de-bouncing gets over
-	GPIO_IRQHandling(GPIO_PIN_NO_0); // clear the pending event from exti line (Button Interrupt)
- 800027c:	2000      	movs	r0, #0
+	GPIO_IRQHandling(GPIO_PIN_NO_5); // clear the pending event from exti line (Button Interrupt)
+ 800027c:	2005      	movs	r0, #5
  800027e:	f000 fb05 	bl	800088c <GPIO_IRQHandling>
 	GPIO_ToggleOutputPin(GPIOA, GPIO_PIN_NO_6); // toggle the LED status (0 to 1 and vice versa)
  8000282:	2106      	movs	r1, #6
- 8000284:	4802      	ldr	r0, [pc, #8]	; (8000290 <EXTI0_IRQHandler+0x18>)
+ 8000284:	4802      	ldr	r0, [pc, #8]	; (8000290 <EXTI9_5_IRQHandler+0x18>)
  8000286:	f000 fa40 	bl	800070a <GPIO_ToggleOutputPin>
 }
  800028a:	bf00      	nop
@@ -695,7 +694,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
  8000554:	3302      	adds	r3, #2
  8000556:	f842 1023 	str.w	r1, [r2, r3, lsl #2]
 
-		//3 . enable the exti interrupt delivery using IMR
+		//3 . enable the exti interrupt delivery using IMR - Must Command for interrupts!
 		EXTI->IMR |= 1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber;
  800055a:	4b4e      	ldr	r3, [pc, #312]	; (8000694 <GPIO_Init+0x2bc>)
  800055c:	681b      	ldr	r3, [r3, #0]

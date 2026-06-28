@@ -385,9 +385,9 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  *(.text*)
  .text.main     0x00000000080001e8       0x90 Src/003_buttonInterrupt.o
                 0x00000000080001e8                main
- .text.EXTI0_IRQHandler
+ .text.EXTI9_5_IRQHandler
                 0x0000000008000278       0x1c Src/003_buttonInterrupt.o
-                0x0000000008000278                EXTI0_IRQHandler
+                0x0000000008000278                EXTI9_5_IRQHandler
  .text.Reset_Handler
                 0x0000000008000294       0x50 Startup/startup_stm32f407vgtx.o
                 0x0000000008000294                Reset_Handler
@@ -415,6 +415,7 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x00000000080002e4                TIM8_UP_TIM13_IRQHandler
                 0x00000000080002e4                I2C3_ER_IRQHandler
                 0x00000000080002e4                LCD_TFT_IRQHandler
+                0x00000000080002e4                EXTI0_IRQHandler
                 0x00000000080002e4                I2C2_EV_IRQHandler
                 0x00000000080002e4                DMA1_Stream2_IRQHandler
                 0x00000000080002e4                CAN1_RX0_IRQHandler
@@ -453,7 +454,6 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x00000000080002e4                TIM5_IRQHandler
                 0x00000000080002e4                DMA2_Stream7_IRQHandler
                 0x00000000080002e4                I2C3_EV_IRQHandler
-                0x00000000080002e4                EXTI9_5_IRQHandler
                 0x00000000080002e4                RTC_WKUP_IRQHandler
                 0x00000000080002e4                ETH_WKUP_IRQHandler
                 0x00000000080002e4                SPI2_IRQHandler
@@ -701,12 +701,12 @@ OUTPUT(stm32f4xx_drivers.elf elf32-littlearm)
  .debug_line    0x00000000000005cb       0x84 Startup/startup_stm32f407vgtx.o
  .debug_line    0x000000000000064f      0x618 drivers/src/STM32F407xx_gpio_driver.o
 
-.debug_str      0x0000000000000000     0x86ba
- .debug_str     0x0000000000000000     0x83b3 Src/003_buttonInterrupt.o
-                                       0x8606 (size before relaxing)
- .debug_str     0x00000000000083b3       0x31 Startup/startup_stm32f407vgtx.o
+.debug_str      0x0000000000000000     0x86bc
+ .debug_str     0x0000000000000000     0x83b5 Src/003_buttonInterrupt.o
+                                       0x8608 (size before relaxing)
+ .debug_str     0x00000000000083b5       0x31 Startup/startup_stm32f407vgtx.o
                                          0x94 (size before relaxing)
- .debug_str     0x00000000000083e4      0x2d6 drivers/src/STM32F407xx_gpio_driver.o
+ .debug_str     0x00000000000083e6      0x2d6 drivers/src/STM32F407xx_gpio_driver.o
                                        0x55c9 (size before relaxing)
 
 .comment        0x0000000000000000       0x7b

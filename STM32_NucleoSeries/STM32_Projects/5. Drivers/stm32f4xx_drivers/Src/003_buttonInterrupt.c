@@ -49,18 +49,17 @@ int main(void)
      * this is btn gpio configuration (we use external pull up for the button)
      */
     GpioBtn.pGPIOx = GPIOA; // GPIOD for the discovery board
-    GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_0;// GPIO_PIN_NO_3; // GPIO_PIN_NO_12 for discovery board, for my board, it's PA5
+    GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_5;// GPIO_PIN_NO_3; // GPIO_PIN_NO_12 for discovery board, for my board, it's PA5
     GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_RT;//GPIO_MODE_IT_FT; //change the mode from MODE_IN to MODE_IT_FT (Interrupt Falling Edge)
     GpioBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
     //GpioBtn.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // This doesn't matter for Inputs, only for outputs
-    GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;	// I changed this to Pull-UP Because, if we look the schematic of button, we already have an 220K external resistor.
-
+    GpioBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD; //GPIO_PIN_PU;	// I use an external 20K resistance, so I don't use the internal ones
     GPIO_PeriClockControl( GPIOA, ENABLE); //GPIOD for discovery board
     GPIO_Init(&GpioBtn);
 
     //IRQ configurations for button interrupt
-    GPIO_IRQPriorityConfig( (uint8_t )IRQ_NO_EXTI0, NVIC_IRQ_PRIO15); // configure priority, set it to 15 (any value from 0 to 15). Better give macro
-    GPIO_IRQInterruptConfig((uint8_t )IRQ_NO_EXTI0, ENABLE); // PD5 sends it's interrupt into EXTI5
+    GPIO_IRQPriorityConfig( (uint8_t )IRQ_NO_EXTI9_5, NVIC_IRQ_PRIO15); // configure priority, set it to 15 (any value from 0 to 15). Better give macro
+    GPIO_IRQInterruptConfig((uint8_t )IRQ_NO_EXTI9_5, ENABLE); // PD5 sends it's interrupt into EXTI5
 
     while (1);
 
@@ -68,10 +67,10 @@ int main(void)
 }
 
 /* EXTI Line[9:5] interrupts */
-void EXTI0_IRQHandler(void)  // Mapping between Interrupt function name and pin number can be found at the MCU's datasheet document.
+void EXTI9_5_IRQHandler(void)  // Mapping between Interrupt function name and pin number can be found at the MCU's datasheet document.
 {
 	//delay(); //200ms . wait till button de-bouncing gets over
-	GPIO_IRQHandling(GPIO_PIN_NO_0); // clear the pending event from exti line (Button Interrupt)
+	GPIO_IRQHandling(GPIO_PIN_NO_5); // clear the pending event from exti line (Button Interrupt)
 	GPIO_ToggleOutputPin(GPIOA, GPIO_PIN_NO_6); // toggle the LED status (0 to 1 and vice versa)
 }
 
