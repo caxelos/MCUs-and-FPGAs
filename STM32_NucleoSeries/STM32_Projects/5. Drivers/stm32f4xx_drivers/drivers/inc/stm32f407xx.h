@@ -11,7 +11,7 @@
  *      - Store under "src" and "inc" the files for the driver
  *      - "Project Properties ---> C/C++ Build ---> Untick "Exclude resource from buil"
  *
- *
+ *		MCU specific header file
  */
 
 #ifndef INC_STM32F407XX_H_
@@ -110,11 +110,11 @@
 /*
  * Base addresses of peripherals which are hanging on APB2 bus
  */
-#define EXTI_BASEADDR	(APB2PERIPH_BASEADDR + 0x3C00)
-#define SPI1_BASE		(APB2PERIPH_BASEADDR + 0x3000)
-#define SYSCFG_BASE		(APB2PERIPH_BASEADDR + 0x3800)
-#define UART1_BASE		(APB2PERIPH_BASEADDR + 0x1000)
-#define UART6_BASE		(APB2PERIPH_BASEADDR + 0x1400)
+#define EXTI_BASEADDR		(APB2PERIPH_BASEADDR + 0x3C00)
+#define SPI1_BASEADDR		(APB2PERIPH_BASEADDR + 0x3000)
+#define SYSCFG_BASEADDR		(APB2PERIPH_BASEADDR + 0x3800)
+#define UART1_BASE			(APB2PERIPH_BASEADDR + 0x1000)
+#define UART6_BASE			(APB2PERIPH_BASEADDR + 0x1400)
 
 
 /************************ peripheral register definition structures ************************/
@@ -226,31 +226,31 @@ typedef struct
 {
     __vo uint32_t MEMRMP;          /* Address offset: 0x00 */
     __vo uint32_t PMC;             /* Address offset: 0x04 */
-    __vo uint32_t EXTICR[4];       /* Address offset: 0x08 - 0x14 */
+    __vo uint32_t EXTICR[4];       /* Address offset: 0x08 - 0x14 */ //Its only purpose is to tell the EXTI controller which GPIO port is connected to each EXTI line. It does not enable interrupts or configure trigger edges
     uint32_t RESERVED1[2];         /* Reserved, 0x18 - 0x1C */
     __vo uint32_t CMPCR;           /* Address offset: 0x20 */
     uint32_t RESERVED2[2];         /* Reserved, 0x24 - 0x28 */
     __vo uint32_t CFGR;            /* Address offset: 0x2C */
 
 } SYSCFG_RegDef_t;
+
+
 /*
  * peripheral definitions ( Peripheral base addresses typecasted to xxx_RegDef_t )
  */
-#define GPIOA ((GPIO_RegDef_t*)GPIOA_BASEADDR)
-#define GPIOB ((GPIO_RegDef_t*)GPIOB_BASEADDR)
-#define GPIOC ((GPIO_RegDef_t*)GPIOC_BASEADDR)
-#define GPIOD ((GPIO_RegDef_t*)GPIOD_BASEADDR)
-#define GPIOE ((GPIO_RegDef_t*)GPIOE_BASEADDR)
-#define GPIOF ((GPIO_RegDef_t*)GPIOF_BASEADDR)
-#define GPIOG ((GPIO_RegDef_t*)GPIOG_BASEADDR)
-#define GPIOH ((GPIO_RegDef_t*)GPIOH_BASEADDR)
-#define GPIOI ((GPIO_RegDef_t*)GPIOI_BASEADDR)
+#define GPIOA 			((GPIO_RegDef_t*)GPIOA_BASEADDR)
+#define GPIOB 			((GPIO_RegDef_t*)GPIOB_BASEADDR)
+#define GPIOC 			((GPIO_RegDef_t*)GPIOC_BASEADDR)
+#define GPIOD			((GPIO_RegDef_t*)GPIOD_BASEADDR)
+#define GPIOE 			((GPIO_RegDef_t*)GPIOE_BASEADDR)
+#define GPIOF 			((GPIO_RegDef_t*)GPIOF_BASEADDR)
+#define GPIOG 			((GPIO_RegDef_t*)GPIOG_BASEADDR)
+#define GPIOH 			((GPIO_RegDef_t*)GPIOH_BASEADDR)
+#define GPIOI 			((GPIO_RegDef_t*)GPIOI_BASEADDR)
 
-#define RCC ((RCC_RegDef_t*)RCC_BASEADDR)
-
-#define EXTI ((EXTI_RegDef_t*)EXTI_BASEADDR)
-
-#define SYSCFG ((SYSCFG_RegDef_t*)EXTI_BASEADDR)
+#define RCC 			((RCC_RegDef_t*)RCC_BASEADDR)
+#define EXTI 			((EXTI_RegDef_t*)EXTI_BASEADDR)
+#define SYSCFG 			((SYSCFG_RegDef_t*)SYSCFG_BASEADDR)
 /*
  * Clock Enable Macros for GPIOx peripherals
  */
@@ -358,6 +358,7 @@ typedef struct
  * NOTE: update these macros with valid values according to your MCU
  * TODO: You may complete this list for other peripherals
  * Always verify these numbers according to our vector table in manual
+ * TODO: Check the "CMSIS function" on ARM Cortex M4
  */
 #define IRQ_NO_EXTI0        6
 #define IRQ_NO_EXTI1        7
@@ -366,6 +367,28 @@ typedef struct
 #define IRQ_NO_EXTI4        10
 #define IRQ_NO_EXTI9_5      23
 #define IRQ_NO_EXTI15_10    40
+
+
+/*
+ * Define some IRQ priorities (instead of giving magic numbers)
+ * macros for all possible priority levels
+ */
+#define NVIC_IRQ_PRIO0    0
+#define NVIC_IRQ_PRIO1    1
+#define NVIC_IRQ_PRIO2    2
+#define NVIC_IRQ_PRIO3    3
+#define NVIC_IRQ_PRIO4    4
+#define NVIC_IRQ_PRIO5    5
+#define NVIC_IRQ_PRIO6    6
+#define NVIC_IRQ_PRIO7    7
+#define NVIC_IRQ_PRIO8    8
+#define NVIC_IRQ_PRIO9    9
+#define NVIC_IRQ_PRIO10   10
+#define NVIC_IRQ_PRIO11   11
+#define NVIC_IRQ_PRIO12   12
+#define NVIC_IRQ_PRIO13   13
+#define NVIC_IRQ_PRIO14   14
+#define NVIC_IRQ_PRIO15   15
 
 
 //some generic macros

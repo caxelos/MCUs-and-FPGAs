@@ -59,8 +59,8 @@ typedef struct
 #define GPIO_PIN_NO_1     1
 #define GPIO_PIN_NO_2     2
 #define GPIO_PIN_NO_3     3
-#define GPIO_PIN_NO_4     4
 #define GPIO_PIN_NO_5     5
+#define GPIO_PIN_NO_4     4
 #define GPIO_PIN_NO_6     6
 #define GPIO_PIN_NO_7     7
 #define GPIO_PIN_NO_8     8
@@ -78,8 +78,8 @@ typedef struct
 /*
  * GPIO pin possible output types (8.4.2)
  */
-#define GPIO_OP_TYPE_PP    0
-#define GPIO_OP_TYPE_OD    1
+#define GPIO_OP_TYPE_PP    0 // Push-Pull configuration
+#define GPIO_OP_TYPE_OD    1 // Open Drain configuration
 
 
 /*
@@ -135,8 +135,7 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber);
 /*
  * IRQ Configuration and ISR handling
  */
-void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);
+void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi); // video 113
 void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi);
 void GPIO_IRQHandling(uint8_t PinNumber);
 

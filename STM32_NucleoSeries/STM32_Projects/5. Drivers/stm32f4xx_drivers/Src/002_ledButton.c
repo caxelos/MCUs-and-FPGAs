@@ -1,8 +1,11 @@
 /*
- * 002_ledButton.c
+ * 002_buttonInterrupt.c
  *
  *  Created on: Jun 11, 2026
  *      Author: caxel
+ *      Connect an external button to PD5 pin and toggle the LED whenever interrupt is triggered by the button press.
+ *      Interrupt should be triggered during the falling edge of the button press.
+ *      Video 115
  */
 
 #include "stm32f407xx.h"

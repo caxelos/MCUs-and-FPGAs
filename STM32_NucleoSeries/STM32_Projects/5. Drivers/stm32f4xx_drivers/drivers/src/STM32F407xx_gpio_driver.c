@@ -124,25 +124,22 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
     	uint8_t portcode = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
     	SYSCFG_PCLK_EN();
     	SYSCFG->EXTICR[temp1] = portcode << (temp2 * 4);
+
+		//3 . enable the exti interrupt delivery using IMR
+		EXTI->IMR |= 1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber;
+
     }
 
-    temp = 0;
 
-    //2. configure the speed
-    temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinSpeed
-            << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+	//2. configure the speed
+	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinSpeed << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) );
+	pGPIOHandle->pGPIOx->OSPEEDR &= ~( 0x3 << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); //clearing
+	pGPIOHandle->pGPIOx->OSPEEDR |= temp;
 
-    pGPIOHandle->pGPIOx->OSPEEDR |= temp;
-
-    temp = 0;
-
-    //3. configure the pupd settings
-    temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinPuPdControl
-            << (2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
-
-    pGPIOHandle->pGPIOx->PUPDR |= temp;
-
-    temp = 0;
+	//3. configure the pupd settings
+	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinPuPdControl << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber) );
+	pGPIOHandle->pGPIOx->PUPDR &= ~( 0x3 << ( 2 * pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber)); //clearing
+	pGPIOHandle->pGPIOx->PUPDR |= temp;
 
     //4. configure the optype
     temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinOPType
@@ -289,17 +286,19 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uint8_t PinNumber)  {
  * IRQ Configuration and ISR handling
  * This configuration happens on the processor's side (we'll use the "Cortex-M4 Devices" Generic User Manual
  * Eg. Given IRQ number 236,
- * 	- Find out which IPR registeor to touch (IPR0...IPR59). Divide 236 by 4, because it's resistor suports 4 sections (
  * 	- So, we have to touch the 59th IPR...and to find the section, we have to mod4 the result
+
+ 	  -We will keep this function only to enable and disable the interrupt!
+
  */
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
+void GPIO_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi) //(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
 {
     if (EnorDi == ENABLE)
     {
     	if (IRQNumber <= 31)
     	{
     	    // program ISER0 register
-    	    *NVIC_ISER0 |= (1 << IRQNumber);
+    	    *NVIC_ISER0 = (1U << IRQNumber);
     	}
     	else if (IRQNumber > 31 && IRQNumber < 64)   // 32 to 63
     	{
@@ -345,14 +344,14 @@ void GPIO_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority)
     uint8_t shift_amount =
         (8 * iprx_section) + (8 - NO_PR_BITS_IMPLEMENTED);
 
-    *(NVIC_PR_BASE_ADDR + iprx) |= (IRQPriority << shift_amount);
+    *(NVIC_PR_BASE_ADDR + iprx) |= (IRQPriority << shift_amount); // SET prio number in exact position in NVIC
 }
 
 
 void GPIO_IRQHandling(uint8_t PinNumber)  {
 
 	// clear the EXTI PR register corresponding to the pin number
-	if (EXTI->PR & (1 << PinNumber)) //CR here insteadvof PR
+	if (EXTI->PR & (1 << PinNumber)) //CR here instead vof PR
 	{
 	    // clear
 	    EXTI->PR |= (1 << PinNumber);
