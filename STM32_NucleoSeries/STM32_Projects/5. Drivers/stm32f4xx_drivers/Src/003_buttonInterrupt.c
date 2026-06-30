@@ -20,7 +20,7 @@
 
 void delay(void)
 {	// 200ms of delay
-    for(uint32_t i = 0; i < 600000; i++);
+    for(uint32_t i = 0; i < 300000; i++);
     	//for(uint32_t j = 0; j < 6000; j++);
 }
 
@@ -69,7 +69,7 @@ int main(void)
 /* EXTI Line[9:5] interrupts */
 void EXTI9_5_IRQHandler(void)  // Mapping between Interrupt function name and pin number can be found at the MCU's datasheet document.
 {
-	//delay(); //200ms . wait till button de-bouncing gets over
+	delay(); //500ms . wait till button de-bouncing gets over
 	GPIO_IRQHandling(GPIO_PIN_NO_5); // clear the pending event from exti line (Button Interrupt)
 	GPIO_ToggleOutputPin(GPIOA, GPIO_PIN_NO_6); // toggle the LED status (0 to 1 and vice versa)
 }

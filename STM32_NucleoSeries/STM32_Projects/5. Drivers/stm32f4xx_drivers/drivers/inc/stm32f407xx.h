@@ -99,6 +99,8 @@
 #define I2C2_BASEADDR	(APB1PERIPH_BASE + 0x5800)
 #define I2C3_BASEADDR	(APB1PERIPH_BASE + 0x5C00)
 
+
+// this microcontroller has actually 4 SPI peripherals
 #define SPI2_BASE		(APB1PERIPH_BASE + 0x38000)
 #define SPI3_BASE		(APB1PERIPH_BASE + 0x3C000)
 
@@ -220,6 +222,22 @@ typedef struct
 
 
 /*
+ * peripheral register definition structure for SPI (28.5.10)
+ */
+typedef struct
+{
+	__vo uint32_t CR1;        /*!< TODO,     										Address offset: 0x00 */
+	__vo uint32_t CR2;        /*!< TODO,     										Address offset: 0x04 */
+	__vo uint32_t SR;         /*!< TODO,     										Address offset: 0x08 */
+	__vo uint32_t DR;         /*!< TODO,     										Address offset: 0x0C */
+	__vo uint32_t CRCPR;      /*!< TODO,     										Address offset: 0x10 */
+	__vo uint32_t RXCRCR;     /*!< TODO,     										Address offset: 0x14 */
+	__vo uint32_t TXCRCR;     /*!< TODO,     										Address offset: 0x18 */
+	__vo uint32_t I2SCFGR;    /*!< TODO,     										Address offset: 0x1C */
+	__vo uint32_t I2SPR;      /*!< TODO,     										Address offset: 0x20 */
+} SPI_RegDef_t;
+
+/*
  * Peripheral register definition structure for SYSCFG (9.3.3)
  */
 typedef struct
@@ -251,6 +269,13 @@ typedef struct
 #define RCC 			((RCC_RegDef_t*)RCC_BASEADDR)
 #define EXTI 			((EXTI_RegDef_t*)EXTI_BASEADDR)
 #define SYSCFG 			((SYSCFG_RegDef_t*)SYSCFG_BASEADDR)
+
+
+#define SPI1  				((SPI_RegDef_t*)SPI1_BASEADDR)
+#define SPI2  				((SPI_RegDef_t*)SPI2_BASEADDR)
+#define SPI3  				((SPI_RegDef_t*)SPI3_BASEADDR)
+//TODO: Include also SPI4
+
 /*
  * Clock Enable Macros for GPIOx peripherals
  */
