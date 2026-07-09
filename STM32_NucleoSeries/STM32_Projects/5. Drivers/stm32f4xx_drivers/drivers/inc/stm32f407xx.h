@@ -18,8 +18,13 @@
 #define INC_STM32F407XX_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define __vo volatile
+
+#ifndef __weak
+#define __weak __attribute__((weak))
+#endif
 
 
 /****************************** START: Processor Specific Details ******************************
@@ -70,11 +75,11 @@
 /*
  * AHBx and APBx Bus Peripheral base addresses
  */
-#define PERIPH_BASEADDR		0x40000000U	// this is the address of the first peripheral
-#define APB1PERIPH_BASEADDR	PERIPH_BASE
-#define APB2PERIPH_BASEADDR	0x40010000U
-#define AHB1PERIPH_BASEADDR	0x40020000U
-#define AHB2PERIPH_BASEADDR	0x50000000U
+#define PERIPH_BASEADDR 						0x40000000U  // this is the address of the first peripheral
+#define APB1PERIPH_BASEADDR						PERIPH_BASEADDR
+#define APB2PERIPH_BASEADDR						0x40010000U
+#define AHB1PERIPH_BASEADDR						0x40020000U
+#define AHB2PERIPH_BASEADDR						0x50000000U
 
 
 /*
@@ -95,19 +100,27 @@
 /*
  * Base addresses of peripherals which are hanging on APB1 bus
  */
-#define I2C1_BASEADDR	(APB1PERIPH_BASE + 0x5400)
-#define I2C2_BASEADDR	(APB1PERIPH_BASE + 0x5800)
-#define I2C3_BASEADDR	(APB1PERIPH_BASE + 0x5C00)
+#define I2C1_BASEADDR						(APB1PERIPH_BASEADDR + 0x5400)
+#define I2C2_BASEADDR						(APB1PERIPH_BASEADDR + 0x5800)
+#define I2C3_BASEADDR						(APB1PERIPH_BASEADDR + 0x5C00)
 
+#define SPI2_BASEADDR						(APB1PERIPH_BASEADDR + 0x3800)
+#define SPI3_BASEADDR						(APB1PERIPH_BASEADDR + 0x3C00)
 
-// this microcontroller has actually 4 SPI peripherals
-#define SPI2_BASE		(APB1PERIPH_BASE + 0x38000)
-#define SPI3_BASE		(APB1PERIPH_BASE + 0x3C000)
+#define USART2_BASEADDR						(APB1PERIPH_BASEADDR + 0x4400)
+#define USART3_BASEADDR						(APB1PERIPH_BASEADDR + 0x4800)
+#define UART4_BASEADDR						(APB1PERIPH_BASEADDR + 0x4C00)
+#define UART5_BASEADDR						(APB1PERIPH_BASEADDR + 0x5000)
 
-#define USART2_BASE		(APB1PERIPH_BASE + 0x4400)
-#define USART3_BASE		(APB1PERIPH_BASE + 0x4800)
-#define UART4_BASE		(APB1PERIPH_BASE + 0x4C00)
-#define UART5_BASE		(APB1PERIPH_BASE + 0x5000)
+/*
+ * Base addresses of peripherals which are hanging on APB2 bus
+ * TODO : Complete for all other peripherals
+ */
+#define EXTI_BASEADDR						(APB2PERIPH_BASEADDR + 0x3C00)
+#define SPI1_BASEADDR						(APB2PERIPH_BASEADDR + 0x3000)
+#define SYSCFG_BASEADDR        				(APB2PERIPH_BASEADDR + 0x3800)
+#define USART1_BASEADDR						(APB2PERIPH_BASEADDR + 0x1000)
+#define USART6_BASEADDR						(APB2PERIPH_BASEADDR + 0x1400)
 
 /*
  * Base addresses of peripherals which are hanging on APB2 bus
@@ -229,7 +242,7 @@ typedef struct
 	__vo uint32_t CR1;        /*!< TODO,     										Address offset: 0x00 */
 	__vo uint32_t CR2;        /*!< TODO,     										Address offset: 0x04 */
 	__vo uint32_t SR;         /*!< TODO,     										Address offset: 0x08 */
-	__vo uint32_t DR;         /*!< TODO,     										Address offset: 0x0C */
+	__vo uint32_t DR;         /*!<Data register: Data received or to be transmitted (28.5.4, SPI_DR),     										Address offset: 0x0C */
 	__vo uint32_t CRCPR;      /*!< TODO,     										Address offset: 0x10 */
 	__vo uint32_t RXCRCR;     /*!< TODO,     										Address offset: 0x14 */
 	__vo uint32_t TXCRCR;     /*!< TODO,     										Address offset: 0x18 */
@@ -424,5 +437,58 @@ typedef struct
 #define RESET 				DISABLE
 #define GPIO_PIN_SET		SET
 #define GPIO_PIN_RESET		RESET
+#define FLAG_RESET         RESET
+#define FLAG_SET 			SET
+
+
+/******************************************************************************************
+ *Bit position definitions of SPI peripheral
+ ******************************************************************************************/
+/*
+ * Bit position definitions SPI_CR1
+ */
+#define SPI_CR1_CPHA     				 0			// CLOCK PHASE (1-bit): Determines when data is sampled: 0 = First clock edge, 1 = Second clock Edgr. Use it together with CPOL to select SPI mode
+#define SPI_CR1_CPOL      				 1			// CLOCK POLARITY (1-bit): Defines the idle state of SCK (either 0 or 1)
+#define SPI_CR1_MSTR     				 2 			// MASTER SELECTION (1-bit): Selects wheter the peripheral is Slave  (=0) or Master (=1)
+#define SPI_CR1_BR   					 3			// BAUD RATE (3-bit): This divides the APB2 clock (e.g. 16MHz). (e.g 000= PCLK/2, 001 = PCLK/4, 010 = PCLK/8, ... 111 = PCLK /256
+#define SPI_CR1_SPE     				 6			// SPI ENABLE (1-bit): 0 = Disabled, 1 = Enabled
+#define SPI_CR1_LSBFIRST   			 	 7			// TRANSMITION ORDER (1-bit):  0 = MSB first, 1 = LSB first
+#define SPI_CR1_SSI     				 8			// INTERNAL SLAVE SELECT (1-bit): Used only when SW slave management (SSM) is enabled. It provides internal value for the NSS signal. Without setting SSI, the SPI may detect a mode fault (MODF) when operating as a master with SW-managed NSS
+#define SPI_CR1_SSM      				 9			// SW SLAVE MANAGEMENT (1-bit):  Controls NSS management. 0 = Use actual NSS pin, 1 = Use SSI instead)
+#define SPI_CR1_RXONLY      		 	10			// RECEIVE ONLY MODE (1-bit): 0 = Full Duplex, 1 = Receive only
+#define SPI_CR1_DFF     			 	11			// DATA FRAME FORMAT (1-bit): Selects data size (0 = 8-bit, 1 = 16bit)
+#define SPI_CR1_CRCNEXT   			 	12			// If this is enabled, this tells the SPI that the next transmitted frame should be the RC value instead of application data (most applications use it cleared)
+#define SPI_CR1_CRCEN   			 	13			// Enable HW CRC calculation (Rarely used unless the communication protocol requires CRC checking.)
+#define SPI_CR1_BIDIOE     			 	14			// Bidirectional Output Enable: Used only in 1-line bidirectional mode (BIDIMODE = 1). 0 = Receive, 1= Transmit
+#define SPI_CR1_BIDIMODE      			15			// Chooses communication mode: 0 = Normal SPI (MOSI, MISO), 1 = 2 Separate data lines (full duplex) ---> One bidirectional data line, used in some specialized devices.
+
+/*
+ * Bit position definitions SPI_CR2
+ */
+#define SPI_CR2_RXDMAEN		 			0
+#define SPI_CR2_TXDMAEN				 	1
+#define SPI_CR2_SSOE				 	2
+#define SPI_CR2_FRF						4
+#define SPI_CR2_ERRIE					5
+#define SPI_CR2_RXNEIE				 	6
+#define SPI_CR2_TXEIE					7
+
+
+/*
+ * Bit position definitions SPI_SR
+ */
+#define SPI_SR_RXNE						0
+#define SPI_SR_TXE				 		1
+#define SPI_SR_CHSIDE				 	2
+#define SPI_SR_UDR					 	3
+#define SPI_SR_CRCERR				 	4
+#define SPI_SR_MODF					 	5
+#define SPI_SR_OVR					 	6
+#define SPI_SR_BSY					 	7
+#define SPI_SR_FRE					 	8
+
+
+//#include "stm32f407xx_gpio_driver.h"
+//#include "stm32f407xx_spi_driver.h"
 
 #endif /* INC_STM32F407XX_H_ */

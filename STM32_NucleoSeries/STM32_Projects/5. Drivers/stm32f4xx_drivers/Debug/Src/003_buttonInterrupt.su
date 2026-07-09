@@ -1,3 +1,0 @@
-003_buttonInterrupt.c:21:6:delay	16	static
-003_buttonInterrupt.c:27:5:main	32	static
-003_buttonInterrupt.c:70:6:EXTI9_5_IRQHandler	8	static
