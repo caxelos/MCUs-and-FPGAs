@@ -20,8 +20,8 @@ typedef struct
 	uint8_t SPI_BusConfig;   // decide whether the bus should be full-duplex, half-duplex or simplex
 	uint8_t SPI_SclkSpeed;  // check reference manual (28.5.1, "SPI ontrol register 1 (SPI_CR1, bits 5 to 3 "Baud Rate") to see speeds (for SPI peripheral) - Periph. Clock: 16MHz
 	uint8_t SPI_DFF;		// Data frame format (0 = 8-bit data frame format for transmission/reception or 1 = 16-bi data frame)
-	uint8_t SPI_CPOL;
-	uint8_t SPI_CPHA;
+	uint8_t SPI_CPOL;		// sets the idle state of the clock (SCK).
+	uint8_t SPI_CPHA;		// determines which clock edge samples the data.
 	uint8_t SPI_SSM;		// SW slave management; 0 = disabled, 1 = enabled
 }SPI_Config_t;
 

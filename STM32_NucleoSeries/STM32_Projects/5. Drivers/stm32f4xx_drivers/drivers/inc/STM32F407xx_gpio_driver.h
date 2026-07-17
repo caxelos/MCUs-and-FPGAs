@@ -16,12 +16,12 @@
  */
 typedef struct
 {
-    uint8_t GPIO_PinNumber;
-    uint8_t GPIO_PinMode; // GPIO pin possible modes
-    uint8_t GPIO_PinSpeed;
-    uint8_t GPIO_PinPuPdControl;
-    uint8_t GPIO_PinOPType;
-    uint8_t GPIO_PinAltFunMode;
+    uint8_t GPIO_PinNumber; // 0-15
+    uint8_t GPIO_PinMode; // GPIO pin possible modes (Input, Output, AF, Analog)
+    uint8_t GPIO_PinSpeed; // Low, Medium, Fast, High
+    uint8_t GPIO_PinPuPdControl; // No Pull, Pull-Up, Pull-Down
+    uint8_t GPIO_PinOPType; // Push-Pull or Open-Drain
+    uint8_t GPIO_PinAltFunMode;  // AF0-AF15
 
 } GPIO_PinConfig_t;
 

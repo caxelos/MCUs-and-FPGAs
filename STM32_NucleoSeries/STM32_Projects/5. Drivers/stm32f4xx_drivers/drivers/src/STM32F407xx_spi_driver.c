@@ -69,7 +69,7 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi)
 void SPI_Init(SPI_Handle_t *pSPIHandle) // input is a user-configurable item
 {
 
-	//peripheral clock enable
+	//peripheral clock enable, so that the user doesn't need to do it from the application level
 
 	SPI_PeriClockControl(pSPIHandle->pSPIx, ENABLE);
 
@@ -112,6 +112,10 @@ void SPI_Init(SPI_Handle_t *pSPIHandle) // input is a user-configurable item
 
 	tempreg |= pSPIHandle->SPIConfig.SPI_SSM << SPI_CR1_SSM;
 
+
+	//TODO: Configure the MSB or LSB (by default, the transmission is Most Significant bit) SPI_CR1_LSBFIRST
+	//tempreg |= (1 << SPI_CR1_LSBFIRST);
+
 	pSPIHandle->pSPIx->CR1 = tempreg;
 
 }
@@ -152,7 +156,7 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx , uint32_t FlagName)
 
  * @Note              - This is blocking call. We call it blocking API, because the function call will wait until all the bytes are transmitted
  * 					  - The number of bytes to be transmitted are "Len"
- *
+ *f
  * 					  - TXE stands for Transmit Buffer Empty.
  * 					  - It's a status flag (typically SPI_SR.TXE) that tells you whether the SPI transmit data register is ready to accept another data word.
  * 					  The TXE flag indicates whether that register is empty and can accept new dat
@@ -161,10 +165,17 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len)
 {
 	while(Len > 0)
 	{
-		//1. wait until TXE is set
-		while(SPI_GetFlagStatus(pSPIx,SPI_TXE_FLAG)  == FLAG_RESET ); //SPI_TXE_FLAG is MCU specific
+		/*
+		 * 1. Wait until the Transmit Buffer Empty (TXE) flag becomes 1,
+		 *    indicating that the SPI data register is ready to accept another byte/word.
+		 *    TXE is a bit in the SPI Status Register (SPI_SR).
+		 */
+		while(SPI_GetFlagStatus(pSPIx,SPI_TXE_FLAG)  == FLAG_RESET ); //SPI_TXE_FLAG is MCU specifiC
 
-		//2. check the DFF bit in CR1
+		/*
+		 * 2. check the DFF bit in CR1
+		 * The DFF (Data Frame Format) bit tells the SPI peripheral how many bits make up one data frame.
+		 */
 		if( (pSPIx->CR1 & ( 1 << SPI_CR1_DFF) ) )
 		{
 			//16 bit DFF
@@ -173,10 +184,20 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len)
 			Len--;
 			Len--;
 			(uint16_t*)pTxBuffer++;
-		}else
+		}else // this never runs, since we are currently at 16-bit mode
 		{
-			//8 bit DFF
-			pSPIx->DR =   *pTxBuffer;
+			/*
+			 * 8 bit DFF -> Only the lower byte of txBuffer is written to pSpix->DR register
+			 * (It is the register you use to send and receive SPI data.)
+			 * The hardware then moves this data into the shift register
+			 * when it is ready and starts sending it out on the MOSI pin.
+			 *
+			 * SR: "0x3" = Transmit buffer is empty and received data is waiting to be read.
+			 * 	   "0x2" = Transmit buffer is empty, and the received data has already been read.
+			 */
+			//pSPIx->DR = *pTxBuffer;
+			//*((volatile uint8_t *)&pSPIx->DR) = *pTxBuffer;
+			*((volatile uint8_t *)&pSPIx->DR) = 0x55;
 			Len--;
 			pTxBuffer++;
 		}
@@ -251,8 +272,8 @@ void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 	}
 
 
-}
 
+}
 
 /*********************************************************************
  * @fn      		  - SPI_SSIConfig

@@ -152,8 +152,10 @@ typedef struct
 	__vo uint32_t PUPDR;      /*!< GPIO port pull-up/pull-down register, Address offset: 0x0C */
 	__vo uint32_t IDR;        /*!< GPIO port input data register, Address offset: 0x10 */
 	__vo uint32_t ODR;        /*!< GPIO port output data register, Address offset: 0x14 */
-	__vo uint32_t BSRRL;      /*!< GPIO port bit set/reset low register, Address offset: 0x18 */
-	__vo uint32_t BSRRH;      /*!< GPIO port bit set/reset high register, Address offset: 0x1A */
+
+	 __vo uint32_t BSRR;      // <-- NOT BSRRL + BSRRH (these are for other boards)
+	//__vo uint32_t BSRRL;      /*!< GPIO port bit set/reset low register, Address offset: 0x18 */
+	//__vo uint32_t BSRRH;      /*!< GPIO port bit set/reset high register, Address offset: 0x1A */
 	__vo uint32_t LCKR;       /*!< GPIO port configuration lock register, Address offset: 0x1C */
 	__vo uint32_t AFR[2];     /*!< GPIO alternate function registers, Address offset: 0x20-0x24. Instead of creating 2 separate variable, I just created an array her (AFRL & AFRH for alternate functions)*/
 } GPIO_RegDef_t;
@@ -235,7 +237,19 @@ typedef struct
 
 
 /*
+ *
  * peripheral register definition structure for SPI (28.5.10)
+ *
+ * SPI3: 0x40003C00U
+ *
+ * Bitfields of SPI Status Register (SR) ---> contains flags indicating the current state of the SPI peripheral.
+ * 		0	RXNE	Receive buffer not empty. Data is available to read from DR.
+ *		1	TXE	Transmit buffer empty. You can write new data to DR.
+ *		4	CRCERR	CRC error detected.
+ * 		5	MODF	Mode fault error.
+ * 		6	OVR	Overrun error. Received data was lost because it wasn't read in time.
+ * 		7	BSY	SPI is busy transmitting or receiving.
+ * 		8	FRE	Frame format error (TI mode).
  */
 typedef struct
 {
@@ -456,7 +470,7 @@ typedef struct
 #define SPI_CR1_SSI     				 8			// INTERNAL SLAVE SELECT (1-bit): Used only when SW slave management (SSM) is enabled. It provides internal value for the NSS signal. Without setting SSI, the SPI may detect a mode fault (MODF) when operating as a master with SW-managed NSS
 #define SPI_CR1_SSM      				 9			// SW SLAVE MANAGEMENT (1-bit):  Controls NSS management. 0 = Use actual NSS pin, 1 = Use SSI instead)
 #define SPI_CR1_RXONLY      		 	10			// RECEIVE ONLY MODE (1-bit): 0 = Full Duplex, 1 = Receive only
-#define SPI_CR1_DFF     			 	11			// DATA FRAME FORMAT (1-bit): Selects data size (0 = 8-bit, 1 = 16bit)
+#define SPI_CR1_DFF     			 	11			// DATA FRAME FORMAT (1-bit): Selects data size (0 = 8-bit, 1 = 16bit) The DFF (Data Frame Format) bit tells the SPI peripheral how many bits make up one data frame.
 #define SPI_CR1_CRCNEXT   			 	12			// If this is enabled, this tells the SPI that the next transmitted frame should be the RC value instead of application data (most applications use it cleared)
 #define SPI_CR1_CRCEN   			 	13			// Enable HW CRC calculation (Rarely used unless the communication protocol requires CRC checking.)
 #define SPI_CR1_BIDIOE     			 	14			// Bidirectional Output Enable: Used only in 1-line bidirectional mode (BIDIMODE = 1). 0 = Receive, 1= Transmit
