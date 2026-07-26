@@ -195,9 +195,9 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len)
 			 * SR: "0x3" = Transmit buffer is empty and received data is waiting to be read.
 			 * 	   "0x2" = Transmit buffer is empty, and the received data has already been read.
 			 */
-			//pSPIx->DR = *pTxBuffer;
-			//*((volatile uint8_t *)&pSPIx->DR) = *pTxBuffer;
-			*((volatile uint8_t *)&pSPIx->DR) = 0x55;
+
+			*((volatile uint8_t *)&pSPIx->DR) = *pTxBuffer;
+			//*((volatile uint8_t *)&pSPIx->DR) = 0x55; //pSPIx->DR = *pTxBuffer;
 			Len--;
 			pTxBuffer++;
 		}
@@ -306,15 +306,29 @@ void  SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 /*********************************************************************
  * @fn      		  - SPI_SSOEConfig
  *
- * @brief             -
+ * @brief             -Slave Select Output Enable.
  *
- * @param[in]         -
+ * @param[in]         - It is a configuration bit in the STM32 SPI peripheral (typically in the SPI_CR2 register) that
+ * 						controls whether the SPI hardware automatically drives the NSS (Slave Select) pin when the STM32
+ * 						 is operating as an SPI master.
  * @param[in]         -
  * @param[in]         -
  *
+				 * SSOE	SPI Mode	NSS Pin Behavior
+				0	Master	NSS pin is not driven by SPI hardware. You control it manually as a GPIO, or ignore it.
+				1	Master	SPI hardware automatically drives the NSS pin (when configured for hardware NSS output).
+				Either	Slave	This bit has no effect; the slave receives NSS from the external master.
+				 *
  * @return            -
- *
- * @Note              -
+ *SSOE = 1
+				When you enable SPI (SPE = 1), the hardware pulls NSS low.
+				When you disable SPI (SPE = 0), the hardware releases NSS high.
+				You don't have to toggle NSS yourself.
+				SSOE = 0
+				The SPI peripheral does not control the NSS pin.
+				You typically configure NSS as a normal GPIO and manually assert/deassert it before and after each transfer.
+				This is the most common approach when communicating with multiple SPI slaves.
+				 * @Note              -
 
  */
 void  SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)

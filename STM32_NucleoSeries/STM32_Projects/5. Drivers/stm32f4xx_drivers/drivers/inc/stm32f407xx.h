@@ -479,27 +479,26 @@ typedef struct
 /*
  * Bit position definitions SPI_CR2
  */
-#define SPI_CR2_RXDMAEN		 			0
-#define SPI_CR2_TXDMAEN				 	1
-#define SPI_CR2_SSOE				 	2
-#define SPI_CR2_FRF						4
-#define SPI_CR2_ERRIE					5
-#define SPI_CR2_RXNEIE				 	6
-#define SPI_CR2_TXEIE					7
+#define SPI_CR2_TXDMAEN  1   /* TX buffer DMA enable */
+#define SPI_CR2_SSOE     2   /* SS output enable */
+#define SPI_CR2_FRF      4   /* Frame format: Motorola SPI or TI mode */
+#define SPI_CR2_ERRIE    5   /* Error interrupt enable */
+#define SPI_CR2_RXNEIE   6   /* RX buffer not empty interrupt enable */
+#define SPI_CR2_TXEIE    7   /* TX buffer empty interrupt enable */
 
 
 /*
  * Bit position definitions SPI_SR
  */
-#define SPI_SR_RXNE						0
-#define SPI_SR_TXE				 		1
-#define SPI_SR_CHSIDE				 	2
-#define SPI_SR_UDR					 	3
-#define SPI_SR_CRCERR				 	4
-#define SPI_SR_MODF					 	5
-#define SPI_SR_OVR					 	6
-#define SPI_SR_BSY					 	7
-#define SPI_SR_FRE					 	8
+#define SPI_SR_RXNE     0   /* Receive buffer not empty */
+#define SPI_SR_TXE      1   /* Transmit buffer empty */
+#define SPI_SR_CHSIDE   2   /* Channel side (I2S mode) */
+#define SPI_SR_UDR      3   /* Underrun flag (I2S mode) */
+#define SPI_SR_CRCERR   4   /* CRC error flag */
+#define SPI_SR_MODF     5   /* Mode fault flag */
+#define SPI_SR_OVR      6   /* Overrun flag */
+#define SPI_SR_BSY      7   /* SPI is busy */
+#define SPI_SR_FRE      8   /* Frame format error */
 
 
 //#include "stm32f407xx_gpio_driver.h"

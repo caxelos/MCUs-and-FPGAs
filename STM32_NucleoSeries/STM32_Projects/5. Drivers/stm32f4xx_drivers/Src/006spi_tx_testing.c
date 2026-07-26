@@ -58,7 +58,7 @@ void SPI2_GPIOInits(void)
 
 	//NSS
 	//SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_12;
-	//GPIO_Init(&SPIPins);
+	//GPIO_Init(&SPIPins); // check bit SSOE in SPIx_CR1
 }
 
 
