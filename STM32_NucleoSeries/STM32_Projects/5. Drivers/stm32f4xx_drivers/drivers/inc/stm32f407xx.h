@@ -420,6 +420,13 @@ typedef struct
 #define IRQ_NO_EXTI9_5      23
 #define IRQ_NO_EXTI15_10    40
 
+/*
+ * SPI IRQ Numbers
+ */
+#define IRQ_NO_SPI1         35
+#define IRQ_NO_SPI2         36
+#define IRQ_NO_SPI3         51
+
 
 /*
  * Define some IRQ priorities (instead of giving magic numbers)

@@ -15,7 +15,7 @@
 
 #include "STM32F407xx_spi_driver.h"
 
-static void  spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void  spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle); //use "static" keyword to show that these are actually private helper functions
 static void  spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle);
 static void  spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);
 
@@ -249,17 +249,7 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len)
 
 /*********************************************************************
  * @fn      		  - SPI_PeripheralControl
- *
  * @brief             -
- *
- * @param[in]         -
- * @param[in]         -
- * @param[in]         -
- *
- * @return            -
- *
- * @Note              -
-
  */
 void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 {
@@ -278,16 +268,6 @@ void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 /*********************************************************************
  * @fn      		  - SPI_SSIConfig
  *
- * @brief             -
- *
- * @param[in]         -
- * @param[in]         -
- * @param[in]         -
- *
- * @return            -
- *
- * @Note              -
-
  */
 void  SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 {
@@ -346,74 +326,9 @@ void  SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 
 
 
-/*********************************************************************
- * @fn      		  - SPI_IRQInterruptConfig
- *
- * @brief             -
- *
- * @param[in]         -
- * @param[in]         -
- * @param[in]         -
- *
- * @return            -
- *
- * @Note              -
 
- */
-void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi)
-{
-
-	if(EnorDi == ENABLE)
-	{
-		if(IRQNumber <= 31)
-		{
-			//program ISER0 register
-			*NVIC_ISER0 |= ( 1 << IRQNumber );
-
-		}else if(IRQNumber > 31 && IRQNumber < 64 ) //32 to 63
-		{
-			//program ISER1 register
-			*NVIC_ISER1 |= ( 1 << (IRQNumber % 32) );
-		}
-		else if(IRQNumber >= 64 && IRQNumber < 96 )
-		{
-			//program ISER2 register //64 to 95
-			*NVIC_ISER3 |= ( 1 << (IRQNumber % 64) );
-		}
-	}else
-	{
-		if(IRQNumber <= 31)
-		{
-			//program ICER0 register
-			*NVIC_ICER0 |= ( 1 << IRQNumber );
-		}else if(IRQNumber > 31 && IRQNumber < 64 )
-		{
-			//program ICER1 register
-			*NVIC_ICER1 |= ( 1 << (IRQNumber % 32) );
-		}
-		else if(IRQNumber >= 6 && IRQNumber < 96 )
-		{
-			//program ICER2 register
-			*NVIC_ICER3 |= ( 1 << (IRQNumber % 64) );
-		}
-	}
-
-}
-
-
-/*********************************************************************
- * @fn      		  - SPI_IRQPriorityConfig
- *
- * @brief             -
- *
- * @param[in]         -
- * @param[in]         -
- * @param[in]         -
- *
- * @return            -
- *
- * @Note              -
-
+/*
+ * void GPIO_IRQPriorityConfig()
  */
 void SPI_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority)
 {
@@ -430,16 +345,19 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority)
 
 uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t Len)
 {
-	uint8_t state = pSPIHandle->TxState;
+	uint8_t state = pSPIHandle->TxState; //Check 28.5.2, SPI control register 2 (SPI_CR2), 7th position
 
 	if(state != SPI_BUSY_IN_TX)
 	{
 		//1 . Save the Tx buffer address and Len information in some global variables
 		pSPIHandle->pTxBuffer = pTxBuffer;
 		pSPIHandle->TxLen = Len;
+
+
 		//2.  Mark the SPI state as busy in transmission so that
 		//    no other code can take over same SPI peripheral until transmission is over
 		pSPIHandle->TxState = SPI_BUSY_IN_TX;
+
 
 		//3. Enable the TXEIE control bit to get interrupt whenever TXE flag is set in SR
 		pSPIHandle->pSPIx->CR2 |= ( 1 << SPI_CR2_TXEIE );
@@ -451,6 +369,15 @@ uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t Len
 }
 
 
+/*
+RXNE = Receive buffer Not Empty, RXNEIE = RXNE Interrupt Enable
+RXNE tells you that received data is waiting; RXNEIE tells the SPI peripheral to interrupt the CPU when that happens.
+RXNEIE → "Should an interrupt occur?"
+         Control bit in CR2
+
+RXNE   → "Has received data arrived?"
+         Status flag in SR
+*/
 uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t Len)
 {
 	uint8_t state = pSPIHandle->RxState;
@@ -460,8 +387,8 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 		//1 . Save the Rx buffer address and Len information in some global variables
 		pSPIHandle->pRxBuffer = pRxBuffer;
 		pSPIHandle->RxLen = Len;
-		//2.  Mark the SPI state as busy in reception so that
-		//    no other code can take over same SPI peripheral until reception is over
+
+		//2.  Mark the SPI state as busy in reception so that // no other code can take over same SPI peripheral until reception is over
 		pSPIHandle->RxState = SPI_BUSY_IN_RX;
 
 		//3. Enable the RXNEIE control bit to get interrupt whenever RXNEIE flag is set in SR
@@ -477,13 +404,23 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 
 
 
+/*
+ * Decode the reason of the interrupt (receive, transmit or error related)
+ */
 
+
+/*
+ * OVR --> (an overrun condition occurs when the master or he slave completes the reception of the next data frame while the read operOVation of the previous frame from the Rx
+	 buffer has not completed (RXNE flag is set)
+	In this case, the content of the Rx buffer is not updated with the new data received and new data will be discared.
+	(check datasheet for more details)
+ */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
 
 	uint8_t temp1 , temp2;
 	//first lets check for TXE
-	temp1 = pHandle->pSPIx->SR & ( 1 << SPI_SR_TXE);
+	temp1 = pHandle->pSPIx->SR & ( 1 << SPI_SR_TXE); //global vars
 	temp2 = pHandle->pSPIx->CR2 & ( 1 << SPI_CR2_TXEIE);
 
 	if( temp1 && temp2)
@@ -512,12 +449,40 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle)
 		spi_ovr_err_interrupt_handle(pHandle);
 	}
 
+	// TODO: CRC error
 
+	// TODO: MODF error
 }
 
 
 //some helper function implementations
 
+
+/*
+ * TXE (Transmit Buffer Empty) Interrupt Handling
+ *
+ * 1. Handle the TXE interrupt.
+ *
+ * 2. Check the SPI data-frame format:
+ *
+ *    If SPI is in 8-bit mode:
+ *      - Write 1 byte of data into the SPI Data Register (DR).
+ *      - Decrement the transmit length by 1.
+ *
+ *    If SPI is in 16-bit mode:
+ *      - Write 2 bytes of data into the SPI Data Register (DR).
+ *      - Decrement the transmit length by 2.
+ *
+ * 3. Check whether the transmit length has reached zero.
+ *
+ *    If Len == 0:
+ *      - Transmission is complete.
+ *      - Close/disable SPI TXE interrupt.
+ *
+ *    If Len != 0:
+ *      - Transmission is not complete.
+ *      - Wait for the next TXE interrupt and repeat the process.
+ */
 static void  spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
 	// check the DFF bit in CR1
@@ -539,12 +504,11 @@ static void  spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 
 	if(! pSPIHandle->TxLen)
 	{
-		//TxLen is zero , so close the spi transmission and inform the application that
-		//TX is over.
-
-		//this prevents interrupts from setting up of TXE flag
+		// TxLen is zero , we need to close communication; so close the spi transmission
+		// Also inform the application that TX is over
+		//We don't want any more interrupts from TXE flag
 		SPI_CloseTransmisson(pSPIHandle);
-		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT);
+		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT); // The application has to implement this callback
 	}
 
 }
@@ -626,6 +590,54 @@ void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx)
 }
 
 
+/*
+ * IRQ Configuration and ISR handling
+ * This configuration happens on the processor's side (we'll use the "Cortex-M4 Devices" Generic User Manual
+ * Eg. Given IRQ number 236,
+ * 	- So, we have to touch the 59th IPR...and to find the section, we have to mod4 the result
+
+ 	  -We will keep this function only to enable and disable the interrupt!
+
+ */
+void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi) //(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t EnorDi)
+{
+    if (EnorDi == ENABLE)
+    {
+    	if (IRQNumber <= 31)
+    	{
+    	    // program ISER0 register
+    	    *NVIC_ISER0 = (1U << IRQNumber);
+    	}
+    	else if (IRQNumber > 31 && IRQNumber < 64)   // 32 to 63
+    	{
+    	    // program ISER1 register
+    	    *NVIC_ISER1 |= (1 << (IRQNumber % 32)); // explained in video 112 the mod32 part
+    	}
+    	else if (IRQNumber >= 64 && IRQNumber < 96)
+    	{
+    	    // program ISER2 register // 64 to 95
+    	    *NVIC_ISER2 |= (1 << (IRQNumber % 64));
+    	}
+    }
+    else
+    {
+    	if (IRQNumber <= 31)
+    	{
+    	    // program ICER0 register
+    	    *NVIC_ICER0 |= (1 << IRQNumber);
+    	}
+    	else if (IRQNumber > 31 && IRQNumber < 64)
+    	{
+    	    // program ICER1 register
+    	    *NVIC_ICER1 |= (1 << (IRQNumber % 32));
+    	}
+    	else if (IRQNumber >= 64 && IRQNumber < 96)
+    	{
+    	    // program ICER2 register
+    	    *NVIC_ICER2 |= (1 << (IRQNumber % 64));
+    	}
+    }
+}
 
 
 __attribute__((weak)) void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t AppEv)

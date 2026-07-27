@@ -59,7 +59,7 @@ typedef struct
 #define SPI_EVENT_RX_CMPLT   2
 #define SPI_EVENT_OVR_ERR    3
 #define SPI_EVENT_CRC_ERR    4
-
+// TODO: MODF EVENT
 
 /*
  * @SPI_DeviceMode
@@ -156,6 +156,8 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx); // pointer to the base address of SPI peri
  * Data Send and Receive to/from external world
  * 2nd  pointer (uint8 *) is a user provided pointer
  * 3rd para is the size of the transfer (always but it uint32)
+ * IT = Interrupt Based
+ * 	Instead of using the "SPI_RegDef_t *", let's use the "SPI_Handle_t *" structure
  */
 
 void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len);
@@ -163,6 +165,12 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len); //
 
 uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t Len);
 uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t Len);
+
+/*
+ * IRQ Configuration and ISR handling
+ */
+void SPI_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi); // video 113
+void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
 
 /*
  * IRQ Configuration and ISR handling
