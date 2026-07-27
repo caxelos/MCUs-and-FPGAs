@@ -1,6 +1,5 @@
 /*
- * 006spi_tx_testing.c
- *
+ * 008spi_cmd_handling
  * Exercise: SPI Master (STM) and SPI Slave (Arduino)
  *           Command & Response Based Communication
  *
