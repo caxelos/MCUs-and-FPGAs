@@ -15,8 +15,9 @@
  */
 #include<stdio.h>
 #include<string.h>
-#include "stm32f407xx.h"
 
+#include "STM32F407xx_gpio_driver.h"
+#include "STM32F407xx_spi_driver.h"
 
 SPI_Handle_t SPI2handle;
 
@@ -99,14 +100,14 @@ void Slave_GPIO_InterruptPinInit(void)
 
 	//this is led gpio configuration
 	spiIntPin.pGPIOx = GPIOD;
-	spiIntPin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_6;
-	spiIntPin.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_FT;
+	spiIntPin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_6; // The interrupt from Arduino to STM32 is configured to PD6
+	spiIntPin.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_FT; // Falling-edge interrupt
 	spiIntPin.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_LOW;
 	spiIntPin.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;
 
 	GPIO_Init(&spiIntPin);
 
-	GPIO_IRQPriorityConfig(IRQ_NO_EXTI9_5,NVIC_IRQ_PRI15);
+	GPIO_IRQPriorityConfig(IRQ_NO_EXTI9_5,NVIC_IRQ_PRIO15);
 	GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,ENABLE);
 
 }
@@ -133,7 +134,7 @@ int main(void)
 	*/
 	SPI_SSOEConfig(SPI2,ENABLE);
 
-	SPI_IRQInterruptConfig(IRQ_NO_SPI2,ENABLE);
+	SPI_IRQInterruptConfig(IRQ_NO_SPI2,ENABLE); //Enable the Interrupt for SPI2 peripheral
 
 	while(1){
 
@@ -141,17 +142,15 @@ int main(void)
 
 		while(!dataAvailable); //wait till data available interrupt from transmitter device(slave)
 
-		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,DISABLE);
+		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,DISABLE); // when an interrupt is triggered, disable the interrupts at PD6, until we finish the SPI communication round.
 
-		//enable the SPI2 peripheral
-		SPI_PeripheralControl(SPI2,ENABLE);
-
+		SPI_PeripheralControl(SPI2,ENABLE); //enable the SPI2 peripheral
 
 		while(!rcvStop)
 		{
-			/* fetch the data from the SPI peripheral byte by byte in interrupt mode */
-			while ( SPI_SendDataIT(&SPI2handle,&dummy,1) == SPI_BUSY_IN_TX);
-			while ( SPI_ReceiveDataIT(&SPI2handle,&ReadByte,1) == SPI_BUSY_IN_RX );
+			/* fetch the data from the SPI peripheral byte by byte in interrupt mode */ // here the master is getting the message
+			while ( SPI_SendDataIT(&SPI2handle,&dummy,1) == SPI_BUSY_IN_TX);	// send dummy 1-byte in order to receive 1-byte
+			while ( SPI_ReceiveDataIT(&SPI2handle,&ReadByte,1) == SPI_BUSY_IN_RX ); //whenever there is 1 byte of data available in the master, the RXNE interrupt will trigger
 		}
 
 
@@ -165,7 +164,7 @@ int main(void)
 
 		dataAvailable = 0;
 
-		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,ENABLE);
+		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,ENABLE); // SPI has finished, re-enable the interrupt at PD6
 
 
 	}
@@ -190,7 +189,7 @@ void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle,uint8_t AppEv)
 	if(AppEv == SPI_EVENT_RX_CMPLT)
 	{
 				RcvBuff[i++] = ReadByte;
-				if(ReadByte == '\0' || ( i == MAX_LEN)){
+				if(ReadByte == '\0' || ( i == MAX_LEN)){ // keep receiveing data from the slave until you encounter '\0'. That means the message is over.
 					rcvStop = 1;
 					RcvBuff[i-1] = '\0';
 					i = 0;
