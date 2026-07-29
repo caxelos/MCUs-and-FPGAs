@@ -283,10 +283,10 @@ void Slave_GPIO_InterruptPinInit(void)
 	spiIntPin.pGPIOx = GPIOD;
  8000346:	4b0d      	ldr	r3, [pc, #52]	; (800037c <Slave_GPIO_InterruptPinInit+0x48>)
  8000348:	607b      	str	r3, [r7, #4]
-	spiIntPin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_6;
+	spiIntPin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_6; // The interrupt from Arduino to STM32 is configured to PD6
  800034a:	2306      	movs	r3, #6
  800034c:	723b      	strb	r3, [r7, #8]
-	spiIntPin.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_FT;
+	spiIntPin.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IT_FT; // Falling-edge interrupt
  800034e:	2304      	movs	r3, #4
  8000350:	727b      	strb	r3, [r7, #9]
 	spiIntPin.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_LOW;
@@ -351,7 +351,7 @@ int main(void)
  8000398:	4824      	ldr	r0, [pc, #144]	; (800042c <main+0xac>)
  800039a:	f000 fce2 	bl	8000d62 <SPI_SSOEConfig>
 
-	SPI_IRQInterruptConfig(IRQ_NO_SPI2,ENABLE);
+	SPI_IRQInterruptConfig(IRQ_NO_SPI2,ENABLE); //Enable the Interrupt for SPI2 peripheral
  800039e:	2101      	movs	r1, #1
  80003a0:	2024      	movs	r0, #36	; 0x24
  80003a2:	f000 fe5f 	bl	8001064 <SPI_IRQInterruptConfig>
@@ -371,23 +371,21 @@ int main(void)
  80003b4:	2b00      	cmp	r3, #0
  80003b6:	d0fa      	beq.n	80003ae <main+0x2e>
 
-		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,DISABLE);
+		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,DISABLE); // when an interrupt is triggered, disable the interrupts at PD6, until we finish the SPI communication round.
  80003b8:	2100      	movs	r1, #0
  80003ba:	2017      	movs	r0, #23
  80003bc:	f000 fb42 	bl	8000a44 <GPIO_IRQInterruptConfig>
 
-		//enable the SPI2 peripheral
-		SPI_PeripheralControl(SPI2,ENABLE);
+		SPI_PeripheralControl(SPI2,ENABLE); //enable the SPI2 peripheral
  80003c0:	2101      	movs	r1, #1
  80003c2:	481a      	ldr	r0, [pc, #104]	; (800042c <main+0xac>)
  80003c4:	f000 fcb1 	bl	8000d2a <SPI_PeripheralControl>
 
-
 		while(!rcvStop)
  80003c8:	e012      	b.n	80003f0 <main+0x70>
 		{
-			/* fetch the data from the SPI peripheral byte by byte in interrupt mode */
-			while ( SPI_SendDataIT(&SPI2handle,&dummy,1) == SPI_BUSY_IN_TX);
+			/* fetch the data from the SPI peripheral byte by byte in interrupt mode */ // here the master is getting the message
+			while ( SPI_SendDataIT(&SPI2handle,&dummy,1) == SPI_BUSY_IN_TX);	// send dummy 1-byte in order to receive 1-byte
  80003ca:	bf00      	nop
  80003cc:	1dfb      	adds	r3, r7, #7
  80003ce:	2201      	movs	r2, #1
@@ -397,7 +395,7 @@ int main(void)
  80003d8:	4603      	mov	r3, r0
  80003da:	2b02      	cmp	r3, #2
  80003dc:	d0f6      	beq.n	80003cc <main+0x4c>
-			while ( SPI_ReceiveDataIT(&SPI2handle,&ReadByte,1) == SPI_BUSY_IN_RX );
+			while ( SPI_ReceiveDataIT(&SPI2handle,(uint8_t *)&ReadByte,1) == SPI_BUSY_IN_RX ); //whenever there is 1 byte of data available in the master, the RXNE interrupt will trigger
  80003de:	bf00      	nop
  80003e0:	2201      	movs	r2, #1
  80003e2:	4916      	ldr	r1, [pc, #88]	; (800043c <main+0xbc>)
@@ -441,7 +439,7 @@ int main(void)
  800041c:	2200      	movs	r2, #0
  800041e:	701a      	strb	r2, [r3, #0]
 
-		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,ENABLE);
+		GPIO_IRQInterruptConfig(IRQ_NO_EXTI9_5,ENABLE); // SPI has finished, re-enable the interrupt at PD6
  8000420:	2101      	movs	r1, #1
  8000422:	2017      	movs	r0, #23
  8000424:	f000 fb0e 	bl	8000a44 <GPIO_IRQInterruptConfig>
@@ -505,7 +503,7 @@ void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle,uint8_t AppEv)
  800047c:	b2d1      	uxtb	r1, r2
  800047e:	4a11      	ldr	r2, [pc, #68]	; (80004c4 <SPI_ApplicationEventCallback+0x68>)
  8000480:	54d1      	strb	r1, [r2, r3]
-				if(ReadByte == '\0' || ( i == MAX_LEN)){
+				if(ReadByte == '\0' || ( i == MAX_LEN)){ // keep receiveing data from the slave until you encounter '\0'. That means the message is over.
  8000482:	4b0f      	ldr	r3, [pc, #60]	; (80004c0 <SPI_ApplicationEventCallback+0x64>)
  8000484:	781b      	ldrb	r3, [r3, #0]
  8000486:	b2db      	uxtb	r3, r3

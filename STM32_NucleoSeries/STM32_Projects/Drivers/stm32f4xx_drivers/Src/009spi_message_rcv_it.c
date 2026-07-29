@@ -150,7 +150,7 @@ int main(void)
 		{
 			/* fetch the data from the SPI peripheral byte by byte in interrupt mode */ // here the master is getting the message
 			while ( SPI_SendDataIT(&SPI2handle,&dummy,1) == SPI_BUSY_IN_TX);	// send dummy 1-byte in order to receive 1-byte
-			while ( SPI_ReceiveDataIT(&SPI2handle,&ReadByte,1) == SPI_BUSY_IN_RX ); //whenever there is 1 byte of data available in the master, the RXNE interrupt will trigger
+			while ( SPI_ReceiveDataIT(&SPI2handle,(uint8_t *)&ReadByte,1) == SPI_BUSY_IN_RX ); //whenever there is 1 byte of data available in the master, the RXNE interrupt will trigger
 		}
 
 

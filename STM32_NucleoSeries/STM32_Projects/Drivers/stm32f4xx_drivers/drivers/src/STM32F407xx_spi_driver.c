@@ -414,6 +414,21 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 	 buffer has not completed (RXNE flag is set)
 	In this case, the content of the Rx buffer is not updated with the new data received and new data will be discared.
 	(check datasheet for more details)
+
+ 	 /*
+ * SPI Interrupt Requests
+ *
+ * +----------------------------------------+------------+--------------------+
+ * | Interrupt event                        | Event flag | Enable control bit |
+ * +----------------------------------------+------------+--------------------+
+ * | Transmit Tx buffer ready to be loaded  | TXE        | TXEIE              |
+ * | Data received in Rx buffer             | RXNE       | RXNEIE             |
+ * | Master Mode fault event                | MODF       | ERRIE              |
+ * | Overrun error                          | OVR        | ERRIE              |
+ * | CRC error                              | CRCERR     | ERRIE              |
+ * | TI frame format error                  | FRE        | ERRIE              |
+ * +----------------------------------------+------------+--------------------+
+ *
  */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
