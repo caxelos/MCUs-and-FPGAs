@@ -14,7 +14,7 @@
  *		MCU specific header file
  */
 
-#ifndef INC_STM32F407XX_H_
+#ifndef INC_STM32F407XX_H_ // these guards actually prevent inclusion of multiple definitions during the preprocessor stage of the compilation
 #define INC_STM32F407XX_H_
 
 #include <stdint.h>
@@ -142,83 +142,81 @@
  */
 
 /*
- * peripheral register definition structure for GPIO
+ * Peripheral register definition structure for GPIO
+ * STM32F411xx - RM0383, Section 8.4
  */
 typedef struct
 {
-	__vo uint32_t MODER;      /*!< GPIO port mode register,        Address offset: 0x00 */
-	__vo uint32_t OTYPER;     /*!< GPIO port output type register, Address offset: 0x04 */
-	__vo uint32_t OSPEEDR;    /*!< GPIO port output speed register, Address offset: 0x08 */
-	__vo uint32_t PUPDR;      /*!< GPIO port pull-up/pull-down register, Address offset: 0x0C */
-	__vo uint32_t IDR;        /*!< GPIO port input data register, Address offset: 0x10 */
-	__vo uint32_t ODR;        /*!< GPIO port output data register, Address offset: 0x14 */
+    __vo uint32_t MODER;      // 8.4.1  Offset: 0x00 - Selects pin mode: input, output, alternate function or analog
+    __vo uint32_t OTYPER;     // 8.4.2  Offset: 0x04 - Selects output type: push-pull or open-drain
+    __vo uint32_t OSPEEDR;    // 8.4.3  Offset: 0x08 - Controls output speed/slew rate for each GPIO pin
+    __vo uint32_t PUPDR;      // 8.4.4  Offset: 0x0C - Configures no pull, pull-up or pull-down for each pin
+    __vo uint32_t IDR;        // 8.4.5  Offset: 0x10 - Reads the current logic level present on GPIO input pins
+    __vo uint32_t ODR;        // 8.4.6  Offset: 0x14 - Reads/writes the output value of GPIO output pins
+    __vo uint32_t BSRR;       // 8.4.7  Offset: 0x18 - Atomically sets or resets individual GPIO output pins
+    __vo uint32_t LCKR;       // 8.4.8  Offset: 0x1C - Locks GPIO configuration until the next MCU reset
+    __vo uint32_t AFR[2];     // 8.4.9  Offset: 0x20-0x24 - Selects alternate function (AF0-AF15) for each GPIO pin.  Instead of creating 2 separate variable, I just created an array her (AFRL & AFRH for alternate functions)
+                                 // AFR[0] = AFRL for pins 0-7, AFR[1] = AFRH for pins 8-15
 
-	 __vo uint32_t BSRR;      // <-- NOT BSRRL + BSRRH (these are for other boards)
-	//__vo uint32_t BSRRL;      /*!< GPIO port bit set/reset low register, Address offset: 0x18 */
-	//__vo uint32_t BSRRH;      /*!< GPIO port bit set/reset high register, Address offset: 0x1A */
-	__vo uint32_t LCKR;       /*!< GPIO port configuration lock register, Address offset: 0x1C */
-	__vo uint32_t AFR[2];     /*!< GPIO alternate function registers, Address offset: 0x20-0x24. Instead of creating 2 separate variable, I just created an array her (AFRL & AFRH for alternate functions)*/
 } GPIO_RegDef_t;
-//GPIO_RegDef_t *pGPIOA = (GPIO_RegDef_t *)0x40020000;
-/*
- * The diference between USART and UART is that UART DOESNT support synchronous communication! No output clock production or serial clock
- */
 
 
 /*
- * peripheral register definition structure for RCC
+ * Peripheral register definition structure for RCC
+ * STM32F411xx - RM0383, Section 6.3
  */
 typedef struct
 {
-    __vo uint32_t CR;          /* Address offset: 0x00 */
-    __vo uint32_t PLLCFGR;     /* Address offset: 0x04 */
-    __vo uint32_t CFGR;        /* Address offset: 0x08 */
-    __vo uint32_t CIR;         /* Address offset: 0x0C */
+    __vo uint32_t CR;          // 6.3.1  Offset: 0x00 - Enables/monitors HSI, HSE, PLL and PLLI2S clocks
+    __vo uint32_t PLLCFGR;     // 6.3.2  Offset: 0x04 - Configures main PLL source, dividers and multipliers
+    __vo uint32_t CFGR;        // 6.3.3  Offset: 0x08 - Selects system clock and configures AHB/APB prescalers
+    __vo uint32_t CIR;         // 6.3.4  Offset: 0x0C - Clock interrupt enable, status and clear flags
 
-    __vo uint32_t AHB1RSTR;    /* Address offset: 0x10 */
-    __vo uint32_t AHB2RSTR;    /* Address offset: 0x14 */
-    __vo uint32_t AHB3RSTR;    /* Address offset: 0x18 */
+    __vo uint32_t AHB1RSTR;    // 6.3.5  Offset: 0x10 - Resets peripherals connected to the AHB1 bus
+    __vo uint32_t AHB2RSTR;    // 6.3.6  Offset: 0x14 - Resets peripherals connected to the AHB2 bus
+    __vo uint32_t AHB3RSTR;    // 6.3.7  Offset: 0x18 - Resets peripherals connected to the AHB3 bus
 
-    uint32_t RESERVED0;        /* Reserved, 0x1C */
+    uint32_t RESERVED0;        //        Offset: 0x1C - Reserved
 
-    __vo uint32_t APB1RSTR;    /* Address offset: 0x20 */
-    __vo uint32_t APB2RSTR;    /* Address offset: 0x24 */
+    __vo uint32_t APB1RSTR;    // 6.3.8  Offset: 0x20 - Resets peripherals connected to the APB1 bus
+    __vo uint32_t APB2RSTR;    // 6.3.9  Offset: 0x24 - Resets peripherals connected to the APB2 bus
 
-    uint32_t RESERVED1[2];     /* Reserved, 0x28-0x2C */
+    uint32_t RESERVED1[2];     //        Offset: 0x28-0x2C - Reserved
 
-    __vo uint32_t AHB1ENR;     /* Address offset: 0x30 */
-    __vo uint32_t AHB2ENR;     /* Address offset: 0x34 */
-    __vo uint32_t AHB3ENR;     /* Address offset: 0x38 */
+    __vo uint32_t AHB1ENR;     // 6.3.10 Offset: 0x30 - Enables clocks for AHB1 peripherals (GPIO, DMA, CRC, etc.)
+    __vo uint32_t AHB2ENR;     // 6.3.11 Offset: 0x34 - Enables clocks for AHB2 peripherals (USB OTG FS)
+    __vo uint32_t AHB3ENR;     // 6.3.12 Offset: 0x38 - Enables clocks for AHB3 peripherals
 
-    uint32_t RESERVED2;        /* Reserved, 0x3C */
+    uint32_t RESERVED2;        //        Offset: 0x3C - Reserved
 
-    __vo uint32_t APB1ENR;     /* Address offset: 0x40 */
-    __vo uint32_t APB2ENR;     /* Address offset: 0x44 */
+    __vo uint32_t APB1ENR;     // 6.3.13 Offset: 0x40 - Enables APB1 peripheral clocks (I2C, USART2, SPI2, etc.)
+    __vo uint32_t APB2ENR;     // 6.3.14 Offset: 0x44 - Enables APB2 peripheral clocks (SPI1, USART1/6, ADC, etc.)
 
-    uint32_t RESERVED3[2];     /* Reserved, 0x48-0x4C */
+    uint32_t RESERVED3[2];     //        Offset: 0x48-0x4C - Reserved
 
-    __vo uint32_t AHB1LPENR;   /* Address offset: 0x50 */
-    __vo uint32_t AHB2LPENR;   /* Address offset: 0x54 */
-    __vo uint32_t AHB3LPENR;   /* Address offset: 0x58 */
+    __vo uint32_t AHB1LPENR;   // 6.3.15 Offset: 0x50 - Controls AHB1 peripheral clocks during Sleep mode
+    __vo uint32_t AHB2LPENR;   // 6.3.16 Offset: 0x54 - Controls AHB2 peripheral clocks during Sleep mode
+    __vo uint32_t AHB3LPENR;   // 6.3.17 Offset: 0x58 - Controls AHB3 peripheral clocks during Sleep mode
 
-    uint32_t RESERVED4;          /*!< Reserved, 0x5C */
+    uint32_t RESERVED4;        //        Offset: 0x5C - Reserved
 
-    __vo uint32_t APB1LPENR;     /*!< Address offset: 0x60 */
-    __vo uint32_t APB2LPENR;     /*!< Address offset: 0x64 */
+    __vo uint32_t APB1LPENR;   // 6.3.18 Offset: 0x60 - Controls APB1 peripheral clocks during Sleep mode
+    __vo uint32_t APB2LPENR;   // 6.3.19 Offset: 0x64 - Controls APB2 peripheral clocks during Sleep mode
 
-    uint32_t RESERVED5[2];       /*!< Reserved, 0x68-0x6C */
+    uint32_t RESERVED5[2];     //        Offset: 0x68-0x6C - Reserved
 
-    __vo uint32_t BDCR;          /*!< Address offset: 0x70 */
-    __vo uint32_t CSR;           /*!< Address offset: 0x74 */
+    __vo uint32_t BDCR;        // 6.3.20 Offset: 0x70 - Controls LSE, RTC clock source and backup domain reset
+    __vo uint32_t CSR;         // 6.3.21 Offset: 0x74 - Controls LSI and contains reset-cause status flags
 
-    uint32_t RESERVED6[2];       /*!< Reserved, 0x78-0x7C */
+    uint32_t RESERVED6[2];     //        Offset: 0x78-0x7C - Reserved
 
-    __vo uint32_t SSCGR;         /*!< Address offset: 0x80 */
-    __vo uint32_t PLLI2SCFGR;    /*!< Address offset: 0x84 */
-    __vo uint32_t PLLSAICFGR;    /*!< Address offset: 0x88 */
-    __vo uint32_t DCKCFGR;       /*!< Address offset: 0x8C */
-    __vo uint32_t CKGATENR;      /*!< Address offset: 0x90 */
-    __vo uint32_t DCKCFGR2;      /*!< Address offset: 0x94 */
+    __vo uint32_t SSCGR;       // 6.3.22 Offset: 0x80 - Configures PLL spread-spectrum clock generation
+    __vo uint32_t PLLI2SCFGR;  // 6.3.23 Offset: 0x84 - Configures PLLI2S clock multiplication/division
+    __vo uint32_t PLLSAICFGR;  // 6.3.24 Offset: 0x88 - Configures PLLSAI clock parameters
+    __vo uint32_t DCKCFGR;     // 6.3.25 Offset: 0x8C - Configures dedicated peripheral clock sources
+    __vo uint32_t CKGATENR;    // 6.3.26 Offset: 0x90 - Controls clock gating for selected internal clocks
+    __vo uint32_t DCKCFGR2;    // 6.3.27 Offset: 0x94 - Additional dedicated peripheral clock configuration
+
 } RCC_RegDef_t;
 
 
@@ -251,34 +249,62 @@ typedef struct
  * 		7	BSY	SPI is busy transmitting or receiving.
  * 		8	FRE	Frame format error (TI mode).
  */
+
 typedef struct
 {
-	__vo uint32_t CR1;        /*!< TODO,     										Address offset: 0x00 */
-	__vo uint32_t CR2;        /*!< TODO,     										Address offset: 0x04 */
-	__vo uint32_t SR;         /*!< TODO,     										Address offset: 0x08 */
-	__vo uint32_t DR;         /*!<Data register: Data received or to be transmitted (28.5.4, SPI_DR),     										Address offset: 0x0C */
-	__vo uint32_t CRCPR;      /*!< TODO,     										Address offset: 0x10 */
-	__vo uint32_t RXCRCR;     /*!< TODO,     										Address offset: 0x14 */
-	__vo uint32_t TXCRCR;     /*!< TODO,     										Address offset: 0x18 */
-	__vo uint32_t I2SCFGR;    /*!< TODO,     										Address offset: 0x1C */
-	__vo uint32_t I2SPR;      /*!< TODO,     										Address offset: 0x20 */
+    __vo uint32_t CR1;      // 28.5.1 Offset: 0x00 - Controls SPI: enable, master/slave, baud rate, CPOL/CPHA, data format
+    __vo uint32_t CR2;      // 28.5.2 Offset: 0x04 - Controls SPI interrupts, DMA, SS output and frame format
+    __vo uint32_t SR;       // 28.5.3 Offset: 0x08 - Status flags: TxE, RxNE, BSY, overrun, mode fault and CRC error
+    __vo uint32_t DR;       // 28.5.4 Offset: 0x0C - Holds data received or data to be transmitted
+    __vo uint32_t CRCPR;    // 28.5.5 Offset: 0x10 - Sets the polynomial used for SPI CRC calculation
+    __vo uint32_t RXCRCR;   // 28.5.6 Offset: 0x14 - Holds the calculated CRC value for received data
+    __vo uint32_t TXCRCR;   // 28.5.7 Offset: 0x18 - Holds the calculated CRC value for transmitted data
+    __vo uint32_t I2SCFGR;  // 28.5.8 Offset: 0x1C - Configures I2S mode, standard, data length, clock polarity and direction
+    __vo uint32_t I2SPR;    // 28.5.9 Offset: 0x20 - Configures I2S clock prescaler and master clock output
+
 } SPI_RegDef_t;
 
+
 /*
- * Peripheral register definition structure for SYSCFG (9.3.3)
+ * Peripheral register definition structure for SYSCFG
+ * STM32F411xx - RM0383, Section 9.3
  */
 typedef struct
 {
-    __vo uint32_t MEMRMP;          /* Address offset: 0x00 */
-    __vo uint32_t PMC;             /* Address offset: 0x04 */
-    __vo uint32_t EXTICR[4];       /* Address offset: 0x08 - 0x14 */ //Its only purpose is to tell the EXTI controller which GPIO port is connected to each EXTI line. It does not enable interrupts or configure trigger edges
-    uint32_t RESERVED1[2];         /* Reserved, 0x18 - 0x1C */
-    __vo uint32_t CMPCR;           /* Address offset: 0x20 */
-    uint32_t RESERVED2[2];         /* Reserved, 0x24 - 0x28 */
-    __vo uint32_t CFGR;            /* Address offset: 0x2C */
+    __vo uint32_t MEMRMP;       // 9.3.1 Offset: 0x00 - Controls memory mapping at address 0x00000000
+    __vo uint32_t PMC;          // 9.3.2 Offset: 0x04 - Controls peripheral mode, including Ethernet PHY interface
+    __vo uint32_t EXTICR[4];    // 9.3.3 Offset: 0x08-0x14 - Selects GPIO port connected to each EXTI line
+                                //                          Does not enable interrupts or configure trigger edges
+
+    uint32_t RESERVED1[2];      //       Offset: 0x18-0x1C - Reserved memory locations
+
+    __vo uint32_t CMPCR;        // 9.3.4 Offset: 0x20 - Controls I/O compensation cell for high-speed GPIO signals
+
+    uint32_t RESERVED2[2];      //       Offset: 0x24-0x28 - Reserved memory locations
+
+    __vo uint32_t CFGR;         // 9.3.5 Offset: 0x2C - SYSCFG configuration register; controls FMP on supported I2C pins
 
 } SYSCFG_RegDef_t;
 
+
+
+/*
+ * Peripheral register definition structure for I2C
+ * STM32F411xx - RM0383, Section 18.6
+ */
+typedef struct
+{
+  __vo uint32_t CR1;    // 18.6.1  Offset: 0x00 - Controls I2C: enable, START/STOP, ACK, reset
+  __vo uint32_t CR2;    // 18.6.2  Offset: 0x04 - Sets peripheral clock, interrupts and DMA control
+  __vo uint32_t OAR1;   // 18.6.3  Offset: 0x08 - Sets primary own address and 7/10-bit addressing
+  __vo uint32_t OAR2;   // 18.6.4  Offset: 0x0C - Sets secondary own address for dual addressing
+  __vo uint32_t DR;     // 18.6.5  Offset: 0x10 - Stores data byte to transmit or received data byte
+  __vo uint32_t SR1;    // 18.6.6  Offset: 0x14 - Event/error flags: SB, ADDR, TxE, RxNE, BTF, errors
+  __vo uint32_t SR2;    // 18.6.7  Offset: 0x18 - Bus status: master/slave, busy, transmitter/receiver
+  __vo uint32_t CCR;    // 18.6.8  Offset: 0x1C - Sets SCL clock rate and standard/fast mode timing
+  __vo uint32_t TRISE;  // 18.6.9  Offset: 0x20 - Sets maximum allowed SCL signal rise time
+  __vo uint32_t FLTR;   // 18.6.10 Offset: 0x24 - Configures analog and digital noise filtering
+} I2C_RegDef_t;
 
 /*
  * peripheral definitions ( Peripheral base addresses typecasted to xxx_RegDef_t )
@@ -303,6 +329,11 @@ typedef struct
 #define SPI3  				((SPI_RegDef_t*)SPI3_BASEADDR)
 //TODO: Include also SPI4
 
+
+#define I2C1  				((I2C_RegDef_t*)I2C1_BASEADDR)
+#define I2C2  				((I2C_RegDef_t*)I2C2_BASEADDR)
+#define I2C3  				((I2C_RegDef_t*)I2C3_BASEADDR)
+
 /*
  * Clock Enable Macros for GPIOx peripherals
  */
@@ -319,10 +350,14 @@ typedef struct
 #define GPIOH_PCLK_EN()    (RCC->AHB1ENR |= (1 << 7))
 #define GPIOI_PCLK_EN()    (RCC->AHB1ENR |= (1 << 8))
 
+
 /*
  * Clock Enable Macros for I2Cx peripherals
  */
 #define I2C1_PCLK_EN()    ( RCC->APB1ENR |= (1 << 21) )
+#define I2C2_PCLK_EN() (RCC->APB1ENR |= (1 << 22))
+#define I2C3_PCLK_EN() (RCC->APB1ENR |= (1 << 23))
+
 
 /*
  * Clock Enable Macros for SPIx peripherals
@@ -507,6 +542,79 @@ typedef struct
 #define SPI_SR_BSY      7   /* SPI is busy */
 #define SPI_SR_FRE      8   /* Frame format error */
 
+
+
+/******************************************************************************************
+ *Bit position definitions of I2C peripheral
+ ******************************************************************************************/
+/*
+ * Bit position definitions I2C_CR1
+ * STM32F411xx - RM0383, Section 18.6.1
+ */
+#define I2C_CR1_PE          0    // Peripheral Enable: 1 = I2C peripheral enabled
+#define I2C_CR1_NOSTRETCH   7    // Clock stretching disable: 1 = clock stretching disabled
+#define I2C_CR1_START       8    // START generation: generates START/repeated START condition
+#define I2C_CR1_STOP        9    // STOP generation: generates STOP condition
+#define I2C_CR1_ACK         10   // Acknowledge enable: 1 = ACK returned after receiving a byte
+#define I2C_CR1_SWRST       15   // Software reset: resets the I2C peripheral
+
+
+/*
+ * Bit position definitions I2C_CR2
+ * STM32F411xx - RM0383, Section 18.6.2
+ */
+#define I2C_CR2_FREQ        0    // Peripheral clock frequency field starts at bit 0
+#define I2C_CR2_ITERREN     8    // Error interrupt enable
+#define I2C_CR2_ITEVTEN     9    // Event interrupt enable
+#define I2C_CR2_ITBUFEN     10   // Buffer interrupt enable: enables TxE/RxNE interrupts
+
+
+/*
+ * Bit position definitions I2C_OAR1
+ * STM32F411xx - RM0383, Section 18.6.3
+ */
+#define I2C_OAR1_ADD0       0    // Address bit 0 used in 10-bit addressing mode
+#define I2C_OAR1_ADD71      1    // 7-bit own-address field starts at bit 1
+#define I2C_OAR1_ADD98      8    // Upper address bits used in 10-bit addressing mode
+#define I2C_OAR1_ADDMODE    15   // Addressing mode: 0 = 7-bit, 1 = 10-bit
+
+
+/*
+ * Bit position definitions I2C_SR1
+ * STM32F411xx - RM0383, Section 18.6.6
+ */
+#define I2C_SR1_SB          0    // Start Bit: START condition has been generated
+#define I2C_SR1_ADDR        1    // Address sent/matched successfully
+#define I2C_SR1_BTF         2    // Byte Transfer Finished
+#define I2C_SR1_ADD10       3    // 10-bit header has been sent
+#define I2C_SR1_STOPF       4    // STOP condition detected in slave mode
+#define I2C_SR1_RXNE        6    // Receive data register not empty
+#define I2C_SR1_TXE         7    // Transmit data register empty
+#define I2C_SR1_BERR        8    // Bus error detected
+#define I2C_SR1_ARLO        9    // Arbitration lost in master mode
+#define I2C_SR1_AF          10   // Acknowledge failure: NACK received
+#define I2C_SR1_OVR         11   // Overrun/underrun error
+#define I2C_SR1_TIMEOUT     14   // Timeout or Tlow error detected
+
+
+/*
+ * Bit position definitions I2C_SR2
+ * STM32F411xx - RM0383, Section 18.6.7
+ */
+#define I2C_SR2_MSL         0    // Master/Slave: 1 = master mode
+#define I2C_SR2_BUSY        1    // Bus Busy: 1 = communication currently in progress
+#define I2C_SR2_TRA         2    // Transmitter/Receiver: 1 = transmitter, 0 = receiver
+#define I2C_SR2_GENCALL     4    // General call address received
+#define I2C_SR2_DUALF       7    // Dual address flag: matched secondary own address
+
+
+/*
+ * Bit position definitions I2C_CCR
+ * STM32F411xx - RM0383, Section 18.6.8
+ */
+#define I2C_CCR_CCR         0    // Clock control field starts here; determines SCL frequency
+#define I2C_CCR_DUTY        14   // Fast-mode duty cycle: 0 = 2, 1 = 16/9
+#define I2C_CCR_FS          15   // I2C mode: 0 = Standard mode, 1 = Fast mode
 
 //#include "stm32f407xx_gpio_driver.h"
 //#include "stm32f407xx_spi_driver.h"

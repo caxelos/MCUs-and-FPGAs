@@ -5,7 +5,7 @@
  *      Author: caxel
  */
 
-#ifndef INC_STM32F407XX_GPIO_DRIVER_H_
+#ifndef INC_STM32F407XX_GPIO_DRIVER_H_ // these guards actually prevent inclusion of multiple definitions during the preprocessor stage of the compilation
 #define INC_STM32F407XX_GPIO_DRIVER_H_
 #endif /* INC_STM32F407XX_GPIO_DRIVER_H_ */
 

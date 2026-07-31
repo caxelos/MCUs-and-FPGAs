@@ -6,7 +6,7 @@
  *      vIDEO 135
  */
 
-#ifndef INC_STM32F407XX_SPI_DRIVER_H_
+#ifndef INC_STM32F407XX_SPI_DRIVER_H_ // these guards actually prevent inclusion of multiple definitions during the preprocessor stage of the compilation
 #define INC_STM32F407XX_SPI_DRIVER_H_
 
 #include "stm32f407xx.h"

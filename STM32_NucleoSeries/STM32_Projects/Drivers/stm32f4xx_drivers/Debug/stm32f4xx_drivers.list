@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00020064  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00003495  00000000  00000000  00020094  2**0
+ 12 .debug_info   00003493  00000000  00000000  00020094  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_abbrev 000009bd  00000000  00000000  00023529  2**0
+ 13 .debug_abbrev 000009bd  00000000  00000000  00023527  2**0
                   CONTENTS, READONLY, DEBUGGING
  14 .debug_aranges 00000278  00000000  00000000  00023ee8  2**3
                   CONTENTS, READONLY, DEBUGGING
  15 .debug_ranges 00000220  00000000  00000000  00024160  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  000033e9  00000000  00000000  00024380  2**0
+ 16 .debug_macro  000034fa  00000000  00000000  00024380  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   000020f5  00000000  00000000  00027769  2**0
+ 17 .debug_line   000020ec  00000000  00000000  0002787a  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    0000b38b  00000000  00000000  0002985e  2**0
+ 18 .debug_str    0000b664  00000000  00000000  00029966  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  00034be9  2**0
+ 19 .comment      0000007b  00000000  00000000  00034fca  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00001034  00000000  00000000  00034c64  2**2
+ 20 .debug_frame  00001034  00000000  00000000  00035048  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -2193,9 +2193,9 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
  8000e28:	4770      	bx	lr
 
 08000e2a <SPI_IRQHandling>:
-	 buffer has not completed (RXNE flag is set)
-	In this case, the content of the Rx buffer is not updated with the new data received and new data will be discared.
-	(check datasheet for more details)
+ * | TI frame format error                  | FRE        | ERRIE              |
+ * +----------------------------------------+------------+--------------------+
+ *
  */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
