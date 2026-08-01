@@ -83,20 +83,20 @@ typedef struct
 
 
 /*
- * GPIO pin possible output speeds (8.4.3)
+ * GPIO pin possible output speeds (STM32F411RE Reference Manual RM0383, Section 8.4.3)
  */
-#define GPIO_SPEED_LOW     0
-#define GPIO_SPEED_MEDIUM  1
-#define GPIO_SPEED_FAST    2
-#define GPIO_SPEED_HIGH    3
+#define GPIO_SPEED_LOW     0   // Low output speed
+#define GPIO_SPEED_MEDIUM  1   // Medium output speed
+#define GPIO_SPEED_FAST    2   // Fast output speed
+#define GPIO_SPEED_HIGH    3   // High (very high) output speed
 
 
 /*
- * GPIO pin possible pull-up and pull-down configurations (8.4.4)
+ * GPIO pin possible pull-up and pull-down configurations (STM32F411RE Reference Manual RM0383, Section 8.4.4)
  */
-#define GPIO_NO_PUPD    0
-#define GPIO_PIN_PU     1
-#define GPIO_PIN_PD     2
+#define GPIO_NO_PUPD    0   // No pull-up, no pull-down
+#define GPIO_PIN_PU     1   // Enable internal pull-up resistor
+#define GPIO_PIN_PD     2   // Enable internal pull-down resistor
 
 
 /******************************************************************************************

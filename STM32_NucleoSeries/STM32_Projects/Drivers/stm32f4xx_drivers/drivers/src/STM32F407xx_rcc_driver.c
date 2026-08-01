@@ -6,7 +6,7 @@
  */
 
 
-#include "stm32f407xx_rcc_driver.h"
+#include "STM32F407xx_rcc_driver.h"
 
 
 uint16_t AHB_PreScaler[8] = {2,4,8,16,64,128,256,512}; // it contains the devision factors mentioned in 6.3.3

@@ -8,6 +8,8 @@ int LED = 13;
 char rx_buffer[32] ;
 uint32_t cnt =0;
 uint8_t message[50];
+
+
 void setup() {
 
   Serial.begin(9600);
@@ -34,6 +36,7 @@ void receiveEvent(int bytes)
 {
  while( Wire.available() )
  {
+   Serial.println("ok!\n");  
    rx_buffer[cnt++] = Wire.read();
  }
   rx_buffer[cnt] = '\0';

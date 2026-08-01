@@ -7,7 +7,7 @@
 
 
 #include "STM32F407xx_i2c_driver.h"
-
+#include "STM32F407xx_rcc_driver.h"
 
 static void  I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx);
 static void I2C_ExecuteAddressPhaseWrite(I2C_RegDef_t *pI2Cx, uint8_t SlaveAddr);
@@ -248,7 +248,7 @@ void I2C_Init(I2C_Handle_t *pI2CHandle)
 	{
 		//mode is standard mode
 
-		tempreg = (RCC_GetPCLK1Value() /1000000U) + 1 ;
+		tempreg = (RCC_GetPCLK1Value() /1000000U) + 1 ;	// divide by 1MHz plus 1
 
 	}else
 	{

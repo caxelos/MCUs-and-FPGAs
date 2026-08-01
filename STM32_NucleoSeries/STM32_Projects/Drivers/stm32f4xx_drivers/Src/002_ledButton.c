@@ -38,7 +38,7 @@ int main(void)
 
     // BUTTON
     GpioBtn.pGPIOx = GPIOC; // GPIOD for the discovery board
-    GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13; // GPIO_PIN_NO_12 for discovery board, for my board, it's PA5
+    GpioBtn.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13; // button is on PC13 on Nucleo and on PA0 on Discovery board
     GpioBtn.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
     GpioBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
     //GpioBtn.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP; // This doesn't matter for Inputs, only for outputs
