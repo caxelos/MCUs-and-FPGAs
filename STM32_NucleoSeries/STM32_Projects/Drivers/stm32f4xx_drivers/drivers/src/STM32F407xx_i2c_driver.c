@@ -150,7 +150,7 @@ void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
  */
 void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi)
 {
-	if(EnorDi == ENABLE)
+	if(EnorDi == ENABLE) // check which I2C you need
 	{
 		if(pI2Cx == I2C1)
 		{

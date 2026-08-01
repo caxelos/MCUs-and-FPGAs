@@ -64,7 +64,7 @@ uint8_t some_data[] = "We are testing I2C master Tx\n";
 
 void I2C1_GPIOInits(void)
 {
-	GPIO_Handle_t I2CPins;
+	GPIO_Handle_t I2CPins; // TODO: memset the struct to zero
 
 	/*Note : Internal pull-up resistors are used */
 
