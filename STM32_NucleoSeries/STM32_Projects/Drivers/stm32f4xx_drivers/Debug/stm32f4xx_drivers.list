@@ -35,15 +35,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  15 .debug_ranges 000001a8  00000000  00000000  00022a70  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  0000275d  00000000  00000000  00022c18  2**0
+ 16 .debug_macro  0000278e  00000000  00000000  00022c18  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   000019db  00000000  00000000  00025375  2**0
+ 17 .debug_line   000019e3  00000000  00000000  000253a6  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    0000a64b  00000000  00000000  00026d50  2**0
+ 18 .debug_str    0000a6bc  00000000  00000000  00026d89  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  0003139b  2**0
+ 19 .comment      0000007b  00000000  00000000  00031445  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00000724  00000000  00000000  00031418  2**2
+ 20 .debug_frame  00000724  00000000  00000000  000314c0  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -125,7 +125,7 @@ void I2C1_GPIOInits(void)
  8000224:	b580      	push	{r7, lr}
  8000226:	b084      	sub	sp, #16
  8000228:	af00      	add	r7, sp, #0
-	GPIO_Handle_t I2CPins;
+	GPIO_Handle_t I2CPins; // TODO: memset the struct to zero
 
 	/*Note : Internal pull-up resistors are used */
 
@@ -1274,7 +1274,7 @@ void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnorDi)
  80008a2:	6078      	str	r0, [r7, #4]
  80008a4:	460b      	mov	r3, r1
  80008a6:	70fb      	strb	r3, [r7, #3]
-	if(EnorDi == ENABLE)
+	if(EnorDi == ENABLE) // check which I2C you need
  80008a8:	78fb      	ldrb	r3, [r7, #3]
  80008aa:	2b01      	cmp	r3, #1
  80008ac:	d11f      	bne.n	80008ee <I2C_PeriClockControl+0x52>

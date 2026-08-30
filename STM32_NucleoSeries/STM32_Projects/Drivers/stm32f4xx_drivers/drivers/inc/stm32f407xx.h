@@ -334,6 +334,13 @@ typedef struct
 #define I2C2  				((I2C_RegDef_t*)I2C2_BASEADDR)
 #define I2C3  				((I2C_RegDef_t*)I2C3_BASEADDR)
 
+#define USART1  			((USART_RegDef_t*)USART1_BASEADDR)
+#define USART2  			((USART_RegDef_t*)USART2_BASEADDR)
+#define USART3  			((USART_RegDef_t*)USART3_BASEADDR)
+#define UART4  				((USART_RegDef_t*)UART4_BASEADDR)
+#define UART5  				((USART_RegDef_t*)UART5_BASEADDR)
+#define USART6  			((USART_RegDef_t*)USART6_BASEADDR)
+
 /*
  * Clock Enable Macros for GPIOx peripherals
  */
@@ -461,7 +468,24 @@ typedef struct
 #define IRQ_NO_SPI1         35
 #define IRQ_NO_SPI2         36
 #define IRQ_NO_SPI3         51
+#define IRQ_NO_SPI4			// TODO
 
+
+/*
+ * I2C IRQ Numbers
+ */
+#define IRQ_NO_I2C1_EV     31
+#define IRQ_NO_I2C1_ER     32
+#define IRQ_NO_I2C2_EV     //TODO
+#define IRQ_NO_I2C2_ER     //TODO
+#define IRQ_NO_I2C3_EV     //TODO
+#define IRQ_NO_I2C3_ER     //TODO
+#define IRQ_NO_USART1	    37
+#define IRQ_NO_USART2	    38
+#define IRQ_NO_USART3	    39
+#define IRQ_NO_UART4	    52
+#define IRQ_NO_UART5	    53
+#define IRQ_NO_USART6	    71
 
 /*
  * Define some IRQ priorities (instead of giving magic numbers)

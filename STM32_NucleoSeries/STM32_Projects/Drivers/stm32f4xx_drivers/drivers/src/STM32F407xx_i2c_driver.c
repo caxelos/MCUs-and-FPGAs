@@ -346,23 +346,23 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uint8_t 
 {
 
 	//1. Generate the START condition
-	I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
+	I2C_GenerateStartCondition(pI2CHandle->pI2Cx); // same command with MasterSendData()
 
 	//2. confirm that start generation is completed by checking the SB flag in the SR1
 	//   Note: Until SB is cleared SCL will be stretched (pulled to LOW)
 	while( !  I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_SB)   );
 
 	//3. Send the address of the slave with r/nw bit set to R(1) (total 8 bits )
-	I2C_ExecuteAddressPhaseRead(pI2CHandle->pI2Cx,SlaveAddr);
+	I2C_ExecuteAddressPhaseRead(pI2CHandle->pI2Cx,SlaveAddr); // different from MasterSendData(), bit is changed from write to read
 
 	//4. wait until address phase is completed by checking the ADDR flag in teh SR1
-	while( !  I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_ADDR)   );
+	while( !  I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_ADDR)   ); // same command with MasterSendData()
 
 
 	//procedure to read only 1 byte from slave
 	if(Len == 1)
 	{
-		//Disable Acking
+		//Disable Acking. In I²C, the master disables ACK (sends a NACK) when it wants to end a read operation.
 		I2C_ManageAcking(pI2CHandle->pI2Cx,I2C_ACK_DISABLE);
 
 
@@ -372,9 +372,15 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uint8_t 
 		//wait until  RXNE becomes 1
 		while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_RXNE) );
 
+
+		/*
+		 * In I²C, after sending data you have two options:
+		 * 	- Generate a STOP condition (end the transaction)
+		 * 	- Generate a Repeated START (keep control of the bus and begin another transfer without releasing it).
+		 */
 		//generate STOP condition
 		if(Sr == I2C_DISABLE_SR )
-			I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+			I2C_GenerateStopCondition(pI2CHandle->pI2Cx); // SR (Stands for Repeated Start) controls whether the driver should generate a STOP condition after a transfer.
 
 		//read data in to buffer
 		*pRxBuffer = pI2CHandle->pI2Cx->DR;
@@ -382,7 +388,29 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uint8_t 
 	}
 
 
-    //procedure to read data from slave when Len > 1
+
+	/* procedure to read data from slave when Len > 1
+	 * During a multi-byte read:
+		- Master ACKs every byte except the last one.
+		- After receiving the last byte, the master NACKs it.
+		- Then the master generates a STOP (or a Repeated START if continuing with another transaction
+
+		Master: START
+		Master: Slave Address + Read
+		Slave : ACK
+
+		Slave : Byte1
+		Master: ACK
+
+		Slave : Byte2
+		Master: ACK
+
+		Slave : Byte3
+		Master: NACK   <-- disable ACK here
+
+		Master: STOP
+	 */
+
 	if(Len > 1)
 	{
 		//clear the ADDR flag
@@ -396,7 +424,7 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uint8_t 
 
 			if(i == 2) //if last 2 bytes are remaining
 			{
-				//Disable Acking
+				//Disable Acking. In I²C, the master disables ACK (sends a NACK) when it wants to end a read operation.
 				I2C_ManageAcking(pI2CHandle->pI2Cx,I2C_ACK_DISABLE);
 
 				//generate STOP condition
@@ -521,16 +549,7 @@ void I2C_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority)
 /*********************************************************************
  * @fn      		  - I2C_MasterSendDataIT
  *
- * @brief             -
- *
- * @param[in]         -
- * @param[in]         -
- * @param[in]         -
- *
- * @return            -
- *
- * @Note              -
-
+ * @brief             - This API just triggers the start condition and enables all the required control bits
  */
 uint8_t I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pTxBuffer, uint32_t Len, uint8_t SlaveAddr,uint8_t Sr)
 {
@@ -668,10 +687,10 @@ static void I2C_MasterHandleRXNEInterrupt(I2C_Handle_t *pI2CHandle )
 void I2C_CloseReceiveData(I2C_Handle_t *pI2CHandle)
 {
 	//Implement the code to disable ITBUFEN Control Bit
-	pI2CHandle->pI2Cx->CR2 &= ~( 1 << I2C_CR2_ITBUFEN);
+	pI2CHandle->pI2Cx->CR2 &= ~( 1 << I2C_CR2_ITBUFEN); // we disable it in order to prevent generating more RXNE ot TXE interrupts
 
 	//Implement the code to disable ITEVFEN Control Bit
-	pI2CHandle->pI2Cx->CR2 &= ~( 1 << I2C_CR2_ITEVTEN);
+	pI2CHandle->pI2Cx->CR2 &= ~( 1 << I2C_CR2_ITEVTEN); // we also disable this in order to prevent getting additional I2C interrupt
 
 	pI2CHandle->TxRxState = I2C_READY;
 	pI2CHandle->pRxBuffer = NULL;
@@ -718,41 +737,59 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 
 	uint32_t temp1, temp2, temp3;
 
-	temp1   = pI2CHandle->pI2Cx->CR2 & ( 1 << I2C_CR2_ITEVTEN) ;
-	temp2   = pI2CHandle->pI2Cx->CR2 & ( 1 << I2C_CR2_ITBUFEN) ;
+	temp1   = pI2CHandle->pI2Cx->CR2 & ( 1 << I2C_CR2_ITEVTEN) ; // Interrupt Event Enabled
+	temp2   = pI2CHandle->pI2Cx->CR2 & ( 1 << I2C_CR2_ITBUFEN) ; // Buffer interrupt enable: enables TxE/RxNE interrupts
 
-	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_SB);
-	//1. Handle For interrupt generated by SB event
-	//	Note : SB flag is only applicable in Master mode
+
+	/*
+	 * 		1.  Handle For interrupt generated by SB event // Interrupt: SB flag is correctly set (SB event)
+	 *		     Note : SB flag is only applicable in Master mode
+	 *		     This block will not be executed in slave mode because for slave SB is always zero
+	 */
+	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_SB); // bit of Status register, Start Bit: START condition has been generated
 	if(temp1 && temp3)
 	{
-		//The interrupt is generated because of SB event
-		//This block will not be executed in slave mode because for slave SB is always zero
-		//In this block lets executed the address phase
-		if(pI2CHandle->TxRxState == I2C_BUSY_IN_TX)
+		if(pI2CHandle->TxRxState == I2C_BUSY_IN_TX) // // If the application state is busy in transmission, you have to call I2C execute phase write
 		{
 			I2C_ExecuteAddressPhaseWrite(pI2CHandle->pI2Cx,pI2CHandle->DevAddr);
-		}else if (pI2CHandle->TxRxState == I2C_BUSY_IN_RX )
+		}else if (pI2CHandle->TxRxState == I2C_BUSY_IN_RX ) // If the application state is busy in receive, you have to call I2C execute phase read
 		{
 			I2C_ExecuteAddressPhaseRead(pI2CHandle->pI2Cx,pI2CHandle->DevAddr);
 		}
 	}
 
+
+	/*
+	 *  	2. Handle For interrupt generated by ADDR event
+	 *         Note : When master mode : Address is sent
+	 *		   When Slave mode   : Address matched with own address
+	 *
+	 *		   When the ADDR flag is set, th clock will be stretched and the master or slave whatever will be in wait sate
+	 *		   We need to clear here this flag
+	 */
 	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_ADDR);
-	//2. Handle For interrupt generated by ADDR event
-	//Note : When master mode : Address is sent
-	//		 When Slave mode   : Address matched with own address
 	if(temp1 && temp3)
 	{
-		// interrupt is generated because of ADDR event
-		I2C_ClearADDRFlag(pI2CHandle);
+
+		I2C_ClearADDRFlag(pI2CHandle); // interrupt is generated because of ADDR event (because of setting the ADDR flag)
 	}
 
+
+
+	/*
+	 *  	2. Handle For interrupt generated by BTF(Byte Transfer Finished) event
+	 *  	If BTF flag is set:
+	 *  		a) During Transmission: if TXE = 1, then both SR and DR are empty
+	 *  		b) During Reception: If RXNE = 1, both SR and DR are full
+	 *  	In both cases, clock will be stretched
+	 *  	*Note: In the non-blocking code, the 2 back2back while() loops with GetFlagStatus() implement this polling (first wait the TXE, and then the BTF
+	 *
+	 */
+
 	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_BTF);
-	//3. Handle For interrupt generated by BTF(Byte Transfer Finished) event
 	if(temp1 && temp3)
 	{
-		//BTF flag is set
+		//BTF flag is set (Interrupt: Byte transfer finished)
 		if(pI2CHandle->TxRxState == I2C_BUSY_IN_TX)
 		{
 			//make sure that TXE is also set .
@@ -769,7 +806,7 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 					I2C_CloseSendData(pI2CHandle);
 
 					//3. notify the application about transmission complete
-					I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_TX_CMPLT);
+					I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_TX_CMPLT); // pass into callback the event code
 
 				}
 			}
@@ -780,24 +817,30 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 		}
 	}
 
+
+	/*
+	 *  	4. Handle For interrupt generated by STOPF event
+	 *			Note : Stop detection flag is applicable only slave mode . For master this flag will never be set
+	 *			The below code block will not be executed by the master since STOPF will not set in master mode
+	 *
+	 */
 	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_STOPF);
-	//4. Handle For interrupt generated by STOPF event
-	// Note : Stop detection flag is applicable only slave mode . For master this flag will never be set
-	//The below code block will not be executed by the master since STOPF will not set in master mode
 	if(temp1 && temp3)
 	{
 		//STOF flag is set
 		//Clear the STOPF ( i.e 1) read SR1 2) Write to CR1 )
 
-		pI2CHandle->pI2Cx->CR1 |= 0x0000;
+		pI2CHandle->pI2Cx->CR1 |= 0x0000; // why?
 
 		//Notify the application that STOP is detected
 		I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_STOP);
 	}
 
 
+	/*
+	 *	5. Handle For interrupt generated by TXE event
+	 */
 	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_TXE);
-	//5. Handle For interrupt generated by TXE event
 	if(temp1 && temp2 && temp3)
 	{
 		//Check for device mode
@@ -820,8 +863,10 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 		}
 	}
 
-	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_RXNE);
+
+
 	//6. Handle For interrupt generated by RXNE event
+	temp3  = pI2CHandle->pI2Cx->SR1 & ( 1 << I2C_SR1_RXNE);
 	if(temp1 && temp2 && temp3)
 	{
 		//check device mode .
@@ -842,7 +887,7 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 			//make sure that the slave is really in receiver mode
 			if(!(pI2CHandle->pI2Cx->SR2 & ( 1 << I2C_SR2_TRA)))
 			{
-				I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_RCV);
+				I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_RCV); // Notify the Slave's app that the slave has received the data from the master
 			}
 		}
 	}

@@ -34,7 +34,7 @@ typedef struct
     uint8_t        *pRxBuffer;    // Pointer to the application receive (Rx) buffer.
     uint32_t        TxLen;        // Stores the remaining number of bytes to transmit.
     uint32_t        RxLen;        // Stores the remaining number of bytes to receive.
-    uint8_t         TxRxState;    // Stores the current I2C communication state (Tx, Rx, or Ready).
+    uint8_t         TxRxState;    // Stores the current I2C communication state (Tx, Rx, or Ready). - I2C_READY, I2C_BUSY_IN_RX, I2C_BUSY_IN_ΤX
     uint8_t         DevAddr;      // Stores the slave/device I2C address.
     uint32_t        RxSize;       // Stores the original total receive size.
     uint8_t         Sr;           // Stores the repeated START setting/value.
@@ -86,8 +86,8 @@ typedef struct
 #define I2C_FLAG_ADDR     (1U << I2C_SR1_ADDR)     // ADDR: Address sent/matched. Master received ACK or Slave address matched.
 #define I2C_FLAG_TIMEOUT  (1U << I2C_SR1_TIMEOUT)  // TIMEOUT: Timeout/Tlow error. I2C bus timeout condition was detected.
 
-#define I2C_DISABLE_SR  	RESET
-#define I2C_ENABLE_SR   	SET
+#define I2C_DISABLE_SR  	RESET			  	   //Disable Repeated Start
+#define I2C_ENABLE_SR   	SET					   //Enable Repeated Start
 
 
 /*
