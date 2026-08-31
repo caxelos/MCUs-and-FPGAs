@@ -1,6 +1,7 @@
 
 
 #include "stm32f407xx_usart_driver.h"
+#include "STM32F407xx_rcc_driver.h"
 
 /*********************************************************************
  * @fn      		  - USART_SetBaudRate

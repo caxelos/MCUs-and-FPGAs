@@ -1,4 +1,4 @@
-"Src/010i2c_master_tx_testing.o"
+"Src/015uart_tx.o"
 "Src/syscalls.o"
 "Src/sysmem.o"
 "Startup/startup_stm32f407vgtx.o"
@@ -6,3 +6,4 @@
 "drivers/src/STM32F407xx_i2c_driver.o"
 "drivers/src/STM32F407xx_rcc_driver.o"
 "drivers/src/STM32F407xx_spi_driver.o"
+"drivers/src/STM32F407xx_usart_driver.o"
